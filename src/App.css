@@ -1,0 +1,34 @@
+.App {
+  background-color: #F4E9FF;
+  display: flex;
+  justify-content: center
+}
+
+.Login {
+  text-align: center;
+}
+
+.Login-logo {
+  height: 20vmin;
+}
+
+.Login-header {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.Menu {
+  background-color: #F4E9FF;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  background-image: url("/public/Background.png");
+}
