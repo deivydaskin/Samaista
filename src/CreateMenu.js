@@ -16,24 +16,18 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-function Menu(props) {
+function CreateDoc() {
     const classes = useStyles();
-
-    function handleSubmit(e) {
-        e.preventDefault();
-        props.history.push('/createDoc')
-    }
-
     return (
-        <div className="Menu">
-            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-                Kurti dokumentus
+        <div className="CreateDoc">
+            <Button variant="contained" color="primary" className={classes.button}>
+                Kurti Valgiaraštį
             </Button>
-            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-                Siųsti dokumentus
+            <Button variant="contained" color="primary" className={classes.button}>
+                Kurti Technologinę kortelę
             </Button>
         </div>
     );
 }
 
-export default withRouter(Menu);
+export default withRouter(CreateDoc);

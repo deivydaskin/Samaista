@@ -32,3 +32,25 @@
   font-size: calc(10px + 2vmin);
   background-image: url("/public/Background.png");
 }
+
+.CreateDoc {
+  background-color: #F4E9FF;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  background-image: url("/public/Background.png");
+}
+
+.CreateTechCard {
+  background-color: #F4E9FF;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  background-image: url("/public/Background.png");
+}
