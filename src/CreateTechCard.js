@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
@@ -14,6 +14,7 @@ import TextFieldMui from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import { data } from './DataUtil';
 import axios from 'axios';
+import TextField from '@material-ui/core/TextField';
 
 
 const useStyles = makeStyles(theme => ({
@@ -184,27 +185,66 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
     );
 });
 
-
+var overallB;
+var overallR;
+var overallA;
+var overallKcal;
 
 function CreateTechCard(props) {
+    useEffect(() => {
+        countOverall();
+    }, [])
+
     const classes = useStyles();
-    const [dataState, setDataState] = useState(data.data);
-    console.log(dataState);
+    const [dataState, setDataState] = useState(data);
 
     const handleChange = i => e => {
-        let newArr = [...dataState];
-        if (e.target.id === "name") {
-            newArr[i][e.target.id] = e.target.value;
+
+        let newArr = { ...dataState };
+        if (e.target.id === "nameOfCard") {
+            newArr.nameOfCard = e.target.value;
+        }
+        else if (e.target.id === "description") {
+            newArr.description = e.target.value;
+        }
+        else if (e.target.id === "name") {
+            newArr.data[i][e.target.id] = e.target.value;
+        } else if (e.target.id === "yield") {
+            newArr.yield = e.target.value;
         } else {
-            newArr[i][e.target.id] = parseInt(e.target.value);
+            newArr.data[i][e.target.id] = parseFloat(e.target.value);
         }
         setDataState(newArr);
-        console.log(newArr.toString())
+
+        if (e.target.id === "b" || e.target.id === "r" || e.target.id === "a" || e.target.id === "kcal") {
+            countOverall()
+        }
+
+    }
+
+    function countOverall() {
+        overallB = 0;
+        overallR = 0;
+        overallA = 0;
+        overallKcal = 0;
+        for (let i = 0; i < dataState.data.length; i++) {
+            overallB += dataState.data[i].b;
+            overallR += dataState.data[i].r;
+            overallA += dataState.data[i].a;
+            overallKcal += dataState.data[i].kcal;
+        }
+        let newArr = { ...dataState };
+        newArr.overallB = overallB;
+        newArr.overallR = overallR;
+        newArr.overallA = overallA;
+        newArr.overallKcal = overallKcal;
+        setDataState(newArr);
     }
 
     function addRow() {
-        setDataState(dataState.concat({
-            number: dataState.length + 1,
+        let newArr = { ...dataState };
+        newArr.data.push({
+            number: dataState.data.length + 1,
             name: "",
             bruto: null,
             neto: null,
@@ -212,17 +252,49 @@ function CreateTechCard(props) {
             r: null,
             a: null,
             kcal: null
-        }));
+        })
+        setDataState(newArr);
     }
 
     function saveDoc() {
-        console.log(dataState);
-        axios
-            .post('api/techCards', {
-                data: dataState
-            })
+
+        //GraphQL reikalauja names of fields be "" todel panaudojau regex, nes nezinau kaip kitaip isparsint.
+        let payload = JSON.stringify(dataState.data);
+        const unquoted = payload.replace(/"([^"]+)":/g, '$1:');
+
+        axios({
+            url: 'http://localhost:3000/graphql',
+            method: 'POST',
+            data: {
+                query: `
+                mutation {
+                    addTechCard (nameOfCard: "${dataState.nameOfCard}", description: "${dataState.description}", data: ${unquoted}, overallB: ${dataState.overallB}, overallR: ${dataState.overallR}, overallA: ${dataState.overallA}, overallKcal: ${dataState.overallKcal}, yield: "${dataState.yield}"){
+                      nameOfCard
+                      description
+                      data {
+                        number
+                        name
+                        bruto
+                        neto
+                        b
+                        r
+                        a
+                        kcal
+                      }
+                      overallB
+                      overallR
+                      overallA
+                      overallKcal
+                      yield
+                    }
+                  }
+                  
+                `
+            }
+        })
             .then((response) => {
                 console.log(response);
+                alert(response.statusText);
             })
             .catch((error) => {
                 console.log(error);
@@ -231,6 +303,9 @@ function CreateTechCard(props) {
 
     return (
         <div className="CreateTechCard">
+            <Button variant="contained" color="primary" className={classes.button} onClick={() => props.history.push('/createDoc')} style={{ alignSelf: "flex-start" }}>Atgal</Button>
+            <h3>Patiekalo technologinė kortelė</h3>
+            <TextField id="nameOfCard" label="Pavadinimas" value={dataState.nameOfCard} variant="outlined" style={{ marginBottom: "20px", minWidth: 500 }} onChange={handleChange()} />
             <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="spanning table">
                     <TableHead>
@@ -252,7 +327,7 @@ function CreateTechCard(props) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {dataState.map((row, i) => (
+                        {dataState.data.map((row, i) => (
                             <TableRow key={i}>
                                 <TableCell className={classes.border}><TextField1
                                     inputProps={{ style: { color: '#000000', width: 100 } }}
@@ -324,8 +399,17 @@ function CreateTechCard(props) {
                         ))}
 
                         <TableRow>
-                            <TableCell align="right" colSpan={2} className={classes.border}>Išeiga:</TableCell>
-                            <TableCell align="center" colSpan={2} className={classes.border}>150/4</TableCell>
+                            <TableCell align="right" colSpan={2} className={classes.border}>Išeiga:
+                            </TableCell>
+                            <TableCell align="center" colSpan={2} className={classes.border}>
+                                <TextField1
+                                    inputProps={{ style: { color: '#000000', width: 100 } }}
+                                    value={dataState.yield}
+                                    onChange={handleChange()}
+                                    error
+                                    label="Išeiga"
+                                    id="yield"
+                                /></TableCell>
                             <TableCell align="center" className={classes.border}>-</TableCell>
                             <TableCell align="center" className={classes.border}>-</TableCell>
                             <TableCell align="center" className={classes.border}>-</TableCell>
@@ -333,16 +417,17 @@ function CreateTechCard(props) {
                         </TableRow>
                         <TableRow>
                             <TableCell align="right" colSpan={4} className={classes.border}>Patiekalo maistinė ir energinė vertė:</TableCell>
-                            <TableCell align="center" className={classes.border}>-</TableCell>
-                            <TableCell align="center" className={classes.border}>-</TableCell>
-                            <TableCell align="center" className={classes.border}>-</TableCell>
-                            <TableCell align="center" className={classes.border}>-</TableCell>
+                            <TableCell align="center" className={classes.border}>{dataState.overallB}</TableCell>
+                            <TableCell align="center" className={classes.border}>{dataState.overallR}</TableCell>
+                            <TableCell align="center" className={classes.border}>{dataState.overallA}</TableCell>
+                            <TableCell align="center" className={classes.border}>{dataState.overallKcal}</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button onClick={addRow}>Pridėti eilutę</Button>
-            <Button onClick={saveDoc}>Išsaugoti</Button>
+            <TextField id="description" label="Aprašas" value={dataState.description} multiline variant="outlined" style={{ marginBottom: "10px", marginTop: "10px", minWidth: 700 }} onChange={handleChange()} />
+            <Button onClick={addRow} variant="contained" color="primary" className={classes.button}>Pridėti eilutę</Button>
+            <Button onClick={saveDoc} variant="contained" color="primary" className={classes.button} style={{ alignSelf: "flex-end" }}>Išsaugoti</Button>
         </div>
     );
 }

@@ -2,12 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Create Schema
-const TechCardSchema = new Schema({
-    nameOfCard: {
-        type: String,
-        required: true
-    },
-    description: {
+const MenuSchema = new Schema({
+    nameOfMenu: {
         type: String,
         required: true
     },
@@ -20,12 +16,8 @@ const TechCardSchema = new Schema({
             type: String,
             required: true
         },
-        bruto: {
-            type: Number,
-            required: true
-        },
-        neto: {
-            type: Number,
+        yield: {
+            type: String,
             required: true
         },
         b: {
@@ -60,11 +52,7 @@ const TechCardSchema = new Schema({
     overallKcal: {
         type: Number,
         required: true
-    },
-    yield: {
-        type: String,
-        required: true
     }
 });
 
-module.exports = TechCard = mongoose.model('TechCard', TechCardSchema);
+module.exports = Menu = mongoose.model('Menu', MenuSchema);

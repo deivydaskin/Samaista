@@ -4,7 +4,10 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.8.3",
+    "@material-ui/icons": "^4.5.1",
     "axios": "^0.19.1",
+    "jspdf": "^1.5.3",
+    "jspdf-autotable": "^3.2.11",
     "react": "^16.10.0",
     "react-dom": "^16.10.0",
     "react-router-dom": "^5.1.1",

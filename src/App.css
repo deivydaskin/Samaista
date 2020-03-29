@@ -38,19 +38,30 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  margin: auto;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   background-image: url("/public/Background.png");
 }
 
-.CreateTechCard {
+.CreateTechCard, .CreateMenu {
   background-color: #F4E9FF;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  font-size: calc(10px + 2vmin);
+  background-image: url("/public/Background.png");
+}
+
+.SendDoc{
+  background-color: #F4E9FF;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
   font-size: calc(10px + 2vmin);
   background-image: url("/public/Background.png");
 }

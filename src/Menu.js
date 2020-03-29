@@ -3,6 +3,7 @@ import './App.css';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
+import zIndex from '@material-ui/core/styles/zIndex';
 
 const useStyles = makeStyles(theme => ({
     button: {
@@ -13,6 +14,7 @@ const useStyles = makeStyles(theme => ({
         width: 'auto',
         boxShadow: 'none',
         margin: theme.spacing(2),
+        zIndex: 30
     }
 }));
 
@@ -20,16 +22,20 @@ function Menu(props) {
     const classes = useStyles();
 
     function handleSubmit(e) {
-        e.preventDefault();
-        props.history.push('/createDoc')
+        //e.preventDefault();
+        if (e === "CreateDoc") {
+            props.history.push('/createDoc')
+        } else if (e === "SendDoc") {
+            props.history.push('/sendDoc')
+        }
     }
 
     return (
         <div className="Menu">
-            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+            <Button id="CreateDoc" variant="contained" color="primary" className={classes.button} onClick={() => handleSubmit("CreateDoc")}>
                 Kurti dokumentus
             </Button>
-            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+            <Button id="SendDoc" variant="contained" color="primary" className={classes.button} onClick={() => handleSubmit("SendDoc")}>
                 Siųsti dokumentus
             </Button>
         </div>

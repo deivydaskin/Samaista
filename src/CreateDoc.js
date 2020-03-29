@@ -20,19 +20,27 @@ function CreateDoc(props) {
     const classes = useStyles();
 
     function handleSubmit(e) {
-        e.preventDefault();
-        props.history.push('/createTechCard')
+
+        if (e === "menu") {
+            props.history.push('/createMenu')
+        } else if (e === "techCard") {
+            props.history.push('/createTechCard')
+        }
     }
 
     return (
-        <div className="CreateDoc">
-            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-                Kurti Valgiaraštį
+        <div>
+            <Button variant="contained" color="primary" className={classes.button} onClick={() => props.history.push('/Menu')} style={{ marginRight: "500px", marginBottom: 0 }}>Atgal</Button>
+            <div className="CreateDoc">
+
+                <Button id="menu" variant="contained" color="primary" className={classes.button} onClick={() => handleSubmit("menu")}>
+                    Kurti Valgiaraštį
             </Button>
-            <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-                Kurti Technologinę kortelę
+                <Button id="techCard" variant="contained" color="primary" className={classes.button} onClick={() => handleSubmit("techCard")}>
+                    Kurti Technologinę kortelę
             </Button>
-        </div>
+            </div >
+        </div >
     );
 }
 

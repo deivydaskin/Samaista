@@ -3,7 +3,9 @@ import './App.css';
 import Login from './Login.js';
 import Menu from './Menu.js';
 import CreateDoc from './CreateDoc.js';
-import CreateTechCard from './CreateTechCard.js'
+import CreateTechCard from './CreateTechCard.js';
+import CreateMenu from './CreateMenu.js';
+import SendDoc from './SendDoc.js';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme, makeStyles } from '@material-ui/core/styles';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
@@ -28,6 +30,12 @@ function App() {
             <Route path="/createTechCard">
               <CreateTechCard />
             </Route>
+            <Route path="/createMenu">
+              <CreateMenu />
+            </Route>
+            <Route path="/sendDoc">
+              <SendDoc />
+            </Route>
             <Route path="/createDoc">
               <CreateDoc />
             </Route>
@@ -35,7 +43,7 @@ function App() {
               <Menu />
             </Route>
             <Route path="/">
-              <Login />
+              <Menu />
             </Route>
 
           </Switch>
