@@ -1,6 +1,7 @@
 import React from 'react';
-import logo from './Samaista-logo.svg';
-import './App.css';
+import logo from '../Samaista-logo.svg';
+//import LoginPhoto from '../public/login-photo.jpg'
+import '../css/App.css';
 import Button from '@material-ui/core/Button';
 import { makeStyles, withStyles, fade } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -8,8 +9,7 @@ import { withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
     button: {
-        borderRadius: 50,
-        backgroundColor: "#C29FFF",
+        backgroundColor: "#F95F83",
         color: "#FFF",
         padding: '16px 59.5725px 16px',
         width: 'auto',
@@ -57,24 +57,31 @@ function Login(props) {
 
     return (
         <div className="Login">
-            <header className="Login-header">
-                <img src={logo} className="Login-logo" alt="logo" />
-                <RedditTextField
-                    label="Prisijungimo vardas"
-                    className={classes.margin}
-                    variant="filled"
-                    id="username"
-                />
-                <RedditTextField
-                    label="Slaptažodis"
-                    className={classes.margin}
-                    variant="filled"
-                    id="password"
-                />
-                <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
-                    Prisijungti
+            <div className="column1">
+                <img src={process.env.PUBLIC_URL + '/Group1.png'} className="img" alt="photo" />
+                <div className="overlay">
+                    <h1 className="h1">Organizuok meniu lengviau</h1>
+                    <p className="p">Puikus ir lengvai įsisavinamas įrankis, kuris padės lengviau planuoti maisto gaminimą.</p>
+                </div>
+            </div>
+            <div className="column2">
+                <header className="Login-header">
+                    <img src={logo} className="Login-logo" alt="logo" />
+                    <TextField
+                        label="Prisijungimo vardas"
+                        className={classes.margin}
+                        id="username"
+                    />
+                    <TextField
+                        label="Slaptažodis"
+                        className={classes.margin}
+                        id="password"
+                    />
+                    <Button variant="contained" color="primary" className={classes.button} onClick={handleSubmit}>
+                        Prisijungti
                 </Button>
-            </header>
+                </header>
+            </div>
         </div>
     );
 }

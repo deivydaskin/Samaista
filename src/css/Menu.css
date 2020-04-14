@@ -1,0 +1,55 @@
+.Menu {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  }
+
+.createCol {
+    flex: 1;
+    background-color: #F95F83;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.viewCol {
+    flex: 1;
+    background-color: #4687FF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.viewCol > img {
+    margin-top: auto;
+}
+
+.createCol > img {
+    margin-top: auto;
+}
+
+.buttonBox {
+    margin: auto;
+    margin-top: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.logout {
+    align-self: flex-end;
+    top: 5px;
+    right: 5px;
+    width: 100px;
+    height: 35px; 
+}
+
+.logo {
+    align-self: flex-start;
+    margin-top: 0;
+    margin-left: 5px;
+    width: 10%;
+    height: auto;
+    color: #FFFFFF;
+}

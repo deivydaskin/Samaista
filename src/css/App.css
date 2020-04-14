@@ -1,18 +1,66 @@
 .App {
-  background-color: #F4E9FF;
+  background-color: #FFFFFF;
   display: flex;
-  justify-content: center
+  justify-content: center;
+  height: 100vh;
 }
 
 .Login {
-  text-align: center;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
-.Login-logo {
+.column1 {
+  flex: 2 1 50%;
+  min-width: 0;
+  flex-shrink: 0;  
+}
+
+.column2 {
+  flex: 0 0 50%;
+  background-color: #FFFFFF;
+}
+
+.column1 img {
+    object-fit: cover;
+    object-position: 50% 50%;
+    object-position: 0 0;
+    margin-bottom: 0;
+    z-index: 1;
+}
+
+.h1 {
+  z-index: 999;
+  color: #FFFFFF;
+  position: absolute;
+  top: 300px;
+  left: 150px;
+}
+.p {
+  z-index: 999;
+  color: #FFFFFF;
+  position: fixed;
+  top: 350px;
+  left: 150px;
+  word-wrap: break-word;
+  width: 400px;
+}
+
+.overlay {
+  background-color: #F95F83;
+  overflow: hidden;
+  height: 100%;
+  z-index: 4;
+}
+
+ .Login-logo {
   height: 20vmin;
-}
+} 
 
-.Login-header {
+ .Login-header {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -20,18 +68,9 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
-}
+} 
 
-.Menu {
-  background-color: #F4E9FF;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  background-image: url("/public/Background.png");
-}
+
 
 .CreateDoc {
   background-color: #F4E9FF;

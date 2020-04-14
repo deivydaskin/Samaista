@@ -1,11 +1,10 @@
 import React from 'react';
-import './App.css';
-import Login from './Login.js';
-import Menu from './Menu.js';
-import CreateDoc from './CreateDoc.js';
-import CreateTechCard from './CreateTechCard.js';
-import CreateMenu from './CreateMenu.js';
-import SendDoc from './SendDoc.js';
+import './css/App.css';
+import Login from './components/Login.js';
+import Menu from './components/Menu.js';
+import CreateTechCard from './components/CreateTechCard.js';
+import CreateMenu from './components/CreateMenu.js';
+import SendDoc from './components/SendDoc.js';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme, makeStyles } from '@material-ui/core/styles';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
@@ -13,10 +12,10 @@ import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 const theme = createMuiTheme({
   palette: {
     primary: {
-      main: '#C29FFF',
+      main: '#F95F83',
     },
     secondary: {
-      main: '#F4E9FF',
+      main: '#4687FF',
     },
   }
 });
@@ -36,14 +35,11 @@ function App() {
             <Route path="/sendDoc">
               <SendDoc />
             </Route>
-            <Route path="/createDoc">
-              <CreateDoc />
-            </Route>
             <Route path="/menu">
               <Menu />
             </Route>
             <Route path="/">
-              <Menu />
+              <Login />
             </Route>
 
           </Switch>

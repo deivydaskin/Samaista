@@ -1,9 +1,9 @@
 export const data = {
-    nameOfCard: "",
+    nameOfCard: "Pavadinimas",
     description: "",
     data: [
         {
-            number: null,
+            number: 1,
             name: "",
             bruto: null,
             neto: null,
