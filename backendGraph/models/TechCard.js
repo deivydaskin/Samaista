@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 // Create Schema
 const TechCardSchema = new Schema({
+    recipeNumber: {
+        type: String,
+        required: true
+    },
     nameOfCard: {
         type: String,
         required: true
@@ -13,6 +17,10 @@ const TechCardSchema = new Schema({
     },
     data: [{
         number: {
+            type: Number,
+            required: true
+        },
+        code: {
             type: Number,
             required: true
         },

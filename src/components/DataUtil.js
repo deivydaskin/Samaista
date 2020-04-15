@@ -1,9 +1,11 @@
 export const data = {
+    recipeNumber: "Receptūros nr.",
     nameOfCard: "Pavadinimas",
     description: "",
     data: [
         {
             number: 1,
+            code: null,
             name: "",
             bruto: null,
             neto: null,

@@ -20,6 +20,7 @@ import { styles } from '../css/inline-style/createMenuStyle.js';
 import { Container } from '@material-ui/core';
 import InputBase from '@material-ui/core/InputBase';
 import { InputLabel } from '@material-ui/core';
+import SearchIcon from '@material-ui/icons/Search';
 
 
 const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
@@ -67,9 +68,18 @@ function CreateTechCard(props) {
         }
         else if (e.target.id === "name") {
             newArr.data[i][e.target.id] = e.target.value;
-        } else if (e.target.id === "yield") {
+        }
+        else if (e.target.id === "code") {
+            newArr.data[i][e.target.id] = parseInt(e.target.value);
+            console.log(newArr);
+        }
+        else if (e.target.id === "yield") {
             newArr.yield = e.target.value;
-        } else {
+        }
+        else if (e.target.id === "recipeNumber") {
+            newArr.recipeNumber = e.target.value;
+        }
+        else {
             newArr.data[i][e.target.id] = parseFloat(e.target.value);
         }
         setDataState(newArr);
@@ -104,6 +114,7 @@ function CreateTechCard(props) {
         newArr.data.push({
             number: dataState.data.length + 1,
             name: "",
+            code: null,
             bruto: null,
             neto: null,
             b: null,
@@ -114,23 +125,98 @@ function CreateTechCard(props) {
         setDataState(newArr);
     }
 
-    function saveDoc() {
+    function getProduct(arg, i, type) {
+        if (type === "code") {
+            axios({
+                url: 'http://localhost:3000/graphql',
+                method: 'POST',
+                data: {
+                    query: `
+                query{
+                    ProductByCode(code: "${arg}") {
+                      nameOfProduct
+                      bruto
+                      neto
+                      b
+                      r
+                      a
+                      kcal
+                    }
+                }
+                `
+                }
+            })
+                .then((response) => {
+                    console.log(response.data.data);
+                    let newArr = { ...dataState };
+                    newArr.data[i].name = response.data.data.ProductByCode.nameOfProduct;
+                    newArr.data[i].bruto = response.data.data.ProductByCode.bruto;
+                    newArr.data[i].neto = response.data.data.ProductByCode.neto;
+                    newArr.data[i].b = response.data.data.ProductByCode.b;
+                    newArr.data[i].r = response.data.data.ProductByCode.r;
+                    newArr.data[i].a = response.data.data.ProductByCode.a;
+                    newArr.data[i].kcal = response.data.data.ProductByCode.kcal;
+                    setDataState(newArr);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else if (type === "name") {
+            axios({
+                url: 'http://localhost:3000/graphql',
+                method: 'POST',
+                data: {
+                    query: `
+                    query{
+                        ProductByName(nameOfProduct: "${arg}") {
+                          nameOfProduct
+                          bruto
+                          neto
+                          b
+                          r
+                          a
+                          kcal
+                        }
+                    }
+                    `
+                }
+            })
+                .then((response) => {
+                    console.log(response.data.data.Product);
+                    let newArr = { ...dataState };
+                    newArr.data[i].name = response.data.data.ProductByName.nameOfProduct;
+                    newArr.data[i].bruto = response.data.data.ProductByName.bruto;
+                    newArr.data[i].neto = response.data.data.ProductByName.neto;
+                    newArr.data[i].b = response.data.data.ProductByName.b;
+                    newArr.data[i].r = response.data.data.ProductByName.r;
+                    newArr.data[i].a = response.data.data.ProductByName.a;
+                    newArr.data[i].kcal = response.data.data.ProductByName.kcal;
+                    setDataState(newArr);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+    }
 
+    function saveDoc() {
         //GraphQL reikalauja names of fields be "" todel panaudojau regex, nes nezinau kaip kitaip isparsint.
         let payload = JSON.stringify(dataState.data);
         const unquoted = payload.replace(/"([^"]+)":/g, '$1:');
-
+        console.log(unquoted);
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
             data: {
                 query: `
                 mutation {
-                    addTechCard (nameOfCard: "${dataState.nameOfCard}", description: "${dataState.description}", data: ${unquoted}, overallB: ${dataState.overallB}, overallR: ${dataState.overallR}, overallA: ${dataState.overallA}, overallKcal: ${dataState.overallKcal}, yield: "${dataState.yield}"){
+                    addTechCard (recipeNumber: "${dataState.recipeNumber}", nameOfCard: "${dataState.nameOfCard}", description: "${dataState.description}", data: ${unquoted}, overallB: ${dataState.overallB}, overallR: ${dataState.overallR}, overallA: ${dataState.overallA}, overallKcal: ${dataState.overallKcal}, yield: "${dataState.yield}"){
+                      recipeNumber
                       nameOfCard
                       description
                       data {
                         number
+                        code
                         name
                         bruto
                         neto
@@ -172,6 +258,9 @@ function CreateTechCard(props) {
             <div className="Container3">
                 <InputBase id="nameOfCard" label="Pavadinimas" value={dataState.nameOfCard} style={{ marginBottom: "20px", minWidth: 500, color: "#FFFFFF" }} className={classes.input} onChange={handleChange()} />
             </div>
+            <div className="Container1">
+                <InputBase id="recipeNumber" value={dataState.recipeNumber} style={{ marginBottom: "10px", marginLeft: "170px", minWidth: 50, color: "#FFFFFF" }} className={classes.input} onChange={handleChange()} />
+            </div>
             <div className="Container4">
                 <Container classes={classes.root} maxWidth="lg">
                     <Table className={classes.table} aria-label="spanning table">
@@ -179,7 +268,10 @@ function CreateTechCard(props) {
                             <TableRow className={classes.header}>
                                 <TableCell rowSpan={2} className={classes.border}>
                                     Eil. Nr.
-                            </TableCell>
+                                </TableCell>
+                                <TableCell rowSpan={2} className={classes.border}>
+                                    Produkto Kodas
+                                </TableCell>
                                 <TableCell rowSpan={2} className={classes.border}>Maisto produkto pavadinimas</TableCell>
                                 <TableCell align="center" colSpan={2} className={classes.border}>Masė, g</TableCell>
                                 <TableCell align="center" colSpan={4} className={classes.border}>Maistinė ir energinė vertė</TableCell>
@@ -202,14 +294,27 @@ function CreateTechCard(props) {
                                         onChange={handleChange(i)}
                                         error
                                         id="number"
+                                        style={{ width: "50px" }}
                                     /></TableCell>
-                                    <TableCell className={classes.border}><TextField1
+                                    <TableCell className={classes.border} style={{ paddingRight: "0px" }}><TextField1
+                                        inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
+                                        value={row.code}
+                                        onChange={handleChange(i)}
+                                        error
+                                        id="code"
+                                        style={{ width: "75px" }}
+                                    />
+                                        <Button onClick={() => getProduct(row.code, i, "code")}><SearchIcon style={{ color: '#FFFFFF', paddingRight: "0px", marginRight: "0px" }} /></Button>
+                                    </TableCell>
+                                    <TableCell className={classes.border} style={{ paddingRight: "0px" }}><TextField1
                                         inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
                                         value={row.name}
                                         onChange={handleChange(i)}
                                         error
                                         id="name"
-                                    /></TableCell>
+                                        style={{ width: "150px" }}
+                                    /><Button onClick={() => getProduct(row.name, i, "name")}><SearchIcon style={{ color: '#FFFFFF', paddingRight: "0px", marginRight: "0px" }} /></Button>
+                                    </TableCell>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{
                                             style: { color: '#FFFFFF', width: 100 },
@@ -221,6 +326,7 @@ function CreateTechCard(props) {
                                         onChange={handleChange(i)}
                                         error
                                         id="bruto"
+                                        style={{ width: "75px" }}
                                     /></TableCell>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{
@@ -233,6 +339,7 @@ function CreateTechCard(props) {
                                         onChange={handleChange(i)}
                                         error
                                         id="neto"
+                                        style={{ width: "75px" }}
                                     /></TableCell>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{
@@ -245,6 +352,7 @@ function CreateTechCard(props) {
                                         onChange={handleChange(i)}
                                         error
                                         id="b"
+                                        style={{ width: "75px" }}
                                     /></TableCell>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{
@@ -257,6 +365,7 @@ function CreateTechCard(props) {
                                         onChange={handleChange(i)}
                                         error
                                         id="r"
+                                        style={{ width: "75px" }}
                                     /></TableCell>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{
@@ -269,6 +378,7 @@ function CreateTechCard(props) {
                                         onChange={handleChange(i)}
                                         error
                                         id="a"
+                                        style={{ width: "75px" }}
                                     /></TableCell>
                                     <TableCell className={classes.border}>
                                         <TextField1
@@ -282,13 +392,14 @@ function CreateTechCard(props) {
                                             onChange={handleChange(i)}
                                             error
                                             id="kcal"
+                                            style={{ width: "75px" }}
                                         />
                                     </TableCell>
                                 </TableRow>
                             ))}
 
                             <TableRow>
-                                <TableCell align="right" colSpan={2} className={classes.border}>Išeiga:
+                                <TableCell align="right" colSpan={3} className={classes.border}>Išeiga:
                             </TableCell>
                                 <TableCell align="center" colSpan={2} className={classes.border}>
                                     <TextField1
@@ -304,7 +415,7 @@ function CreateTechCard(props) {
                                 <TableCell align="center" className={classes.border}>-</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell align="right" colSpan={4} className={classes.border}>Patiekalo maistinė ir energinė vertė:</TableCell>
+                                <TableCell align="right" colSpan={5} className={classes.border}>Patiekalo maistinė ir energinė vertė:</TableCell>
                                 <TableCell align="center" className={classes.border}>{dataState.overallB}</TableCell>
                                 <TableCell align="center" className={classes.border}>{dataState.overallR}</TableCell>
                                 <TableCell align="center" className={classes.border}>{dataState.overallA}</TableCell>
@@ -315,7 +426,7 @@ function CreateTechCard(props) {
                 </Container>
                 <div className="Container5">
                     <InputLabel style={{ marginTop: '5px', marginLeft: '35px', alignSelf: 'flex-start', color: '#FFFFFF' }}>Aprašas:</InputLabel>
-                    <InputBase id="description" label="Aprašas" value={dataState.description} multiline variant="outlined" style={{ marginBottom: "10px", marginTop: "10px", minWidth: 1160, color: "#FFFFFF" }} className={classes.input} onChange={handleChange()} />
+                    <InputBase id="description" label="Aprašas" value={dataState.description} multiline variant="outlined" style={{ marginBottom: "10px", marginTop: "10px", minWidth: "1125px", color: "#FFFFFF" }} className={classes.input} onChange={handleChange()} />
                     <Button onClick={addRow} variant="contained" color="secondary" className={classes.button}>Pridėti eilutę</Button>
                     <Button onClick={saveDoc} variant="contained" color="secondary" className={classes.button} style={{ alignSelf: "flex-end" }}>Išsaugoti</Button>
                 </div>

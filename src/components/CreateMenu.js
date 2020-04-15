@@ -48,10 +48,10 @@ function CreateMenu(props) {
     const classes = useStyles();
 
     const [dataState, setDataState] = useState({
-        nameOfMenu: "Pirmadienis",
+        nameOfMenu: "Pavadinimas",
         data: [
             {
-                number: 1,
+                recipeNumber: null,
                 name: "",
                 yield: "",
                 b: null,
@@ -81,14 +81,16 @@ function CreateMenu(props) {
 
     }
 
-    function getTechCard(name, i) {
-        axios({
-            url: 'http://localhost:3000/graphql',
-            method: 'POST',
-            data: {
-                query: `
+    function getTechCard(arg, i, type) {
+        if (type === "name") {
+            axios({
+                url: 'http://localhost:3000/graphql',
+                method: 'POST',
+                data: {
+                    query: `
                 query{
-                    TechCard(nameOfCard:"${name}") {
+                    TechCardByName(nameOfCard:"${arg}") {
+                      recipeNumber
                       nameOfCard
                       overallB
                       overallR
@@ -98,20 +100,56 @@ function CreateMenu(props) {
                     }
                 }
                 `
-            }
-        })
-            .then((response) => {
-                let newArr = { ...dataState };
-                newArr.data[i].b = response.data.data.TechCard.overallB;
-                newArr.data[i].r = response.data.data.TechCard.overallR;
-                newArr.data[i].a = response.data.data.TechCard.overallA;
-                newArr.data[i].kcal = response.data.data.TechCard.overallKcal;
-                newArr.data[i].yield = response.data.data.TechCard.yield;
-                setDataState(newArr);
+                }
             })
-            .catch((error) => {
-                console.log(error);
-            });
+                .then((response) => {
+                    let newArr = { ...dataState };
+                    newArr.data[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
+                    newArr.data[i].b = response.data.data.TechCardByName.overallB;
+                    newArr.data[i].r = response.data.data.TechCardByName.overallR;
+                    newArr.data[i].a = response.data.data.TechCardByName.overallA;
+                    newArr.data[i].kcal = response.data.data.TechCardByName.overallKcal;
+                    newArr.data[i].yield = response.data.data.TechCardByName.yield;
+                    setDataState(newArr);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else if (type === "recipeNumber") {
+            axios({
+                url: 'http://localhost:3000/graphql',
+                method: 'POST',
+                data: {
+                    query: `
+                    query{
+                        TechCardByRecipeNumber(recipeNumber:"${arg}") {
+                          recipeNumber
+                          nameOfCard
+                          overallB
+                          overallR
+                          overallA
+                          overallKcal
+                          yield
+                        }
+                    }
+                    `
+                }
+            })
+                .then((response) => {
+                    let newArr = { ...dataState };
+                    newArr.data[i].recipeNumber = response.data.data.TechCardRecipeNumber.recipeNumber;
+                    newArr.data[i].b = response.data.data.TechCardRecipeNumber.overallB;
+                    newArr.data[i].r = response.data.data.TechCardRecipeNumber.overallR;
+                    newArr.data[i].a = response.data.data.TechCardRecipeNumber.overallA;
+                    newArr.data[i].kcal = response.data.data.TechCardRecipeNumber.overallKcal;
+                    newArr.data[i].yield = response.data.data.TechCardRecipeNumber.yield;
+                    setDataState(newArr);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+
     }
 
     function countOverall() {
@@ -205,10 +243,10 @@ function CreateMenu(props) {
                     <Table className={classes.table} aria-label="spanning table">
                         <TableHead>
                             <TableRow className={classes.header}>
-                                <TableCell rowSpan={2} className={classes.border}>
-                                    Eil. Nr.
-                            </TableCell>
                                 <TableCell rowSpan={2} className={classes.border}>Patiekalo pavadinimas</TableCell>
+                                <TableCell rowSpan={2} className={classes.border}>
+                                    Receptūros Nr.
+                                </TableCell>
                                 <TableCell rowSpan={2} align="center" className={classes.border}>Išeiga</TableCell>
                                 <TableCell align="center" colSpan={3} className={classes.border}>Patiekalo maistinė vertė, g</TableCell>
                                 <TableCell rowSpan={2} className={classes.border}>Energinė vertė, kcal</TableCell>
@@ -225,19 +263,20 @@ function CreateMenu(props) {
                                 <TableRow key={i}>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
-                                        value={row.number}
-                                        onChange={handleChange(i)}
-                                        error
-                                        id="number"
-                                    /></TableCell>
-                                    <TableCell className={classes.border}><TextField1
-                                        inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
                                         value={row.name}
                                         onChange={handleChange(i)}
                                         error
                                         id="name"
                                     />
-                                        <Button onClick={() => getTechCard(row.name, i)}><SearchIcon style={{ color: '#FFFFFF' }} /></Button>
+                                        <Button onClick={() => getTechCard(row.name, i, "name")}><SearchIcon style={{ color: '#FFFFFF' }} /></Button>
+                                    </TableCell>
+                                    <TableCell className={classes.border}><TextField1
+                                        inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
+                                        value={row.recipeNumber}
+                                        onChange={handleChange(i)}
+                                        error
+                                        id="recipeNumber"
+                                    /><Button onClick={() => getTechCard(row.recipeNumber, i, "recipeNumber")}><SearchIcon style={{ color: '#FFFFFF' }} /></Button>
                                     </TableCell>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{ style: { color: '#FFFFFF', width: 100 } }}

@@ -56,6 +56,7 @@ const techCardDataType = new GraphQLObjectType({
     name: 'techCardData',
     fields: () => ({
         number: { type: GraphQLFloat },
+        code: { type: GraphQLInt },
         name: { type: GraphQLString },
         bruto: { type: GraphQLFloat },
         neto: { type: GraphQLFloat },
@@ -70,6 +71,7 @@ const techCardInputDataType = new GraphQLInputObjectType({
     name: 'techCardInputData',
     fields: () => ({
         number: { type: GraphQLFloat },
+        code: { type: GraphQLInt },
         name: { type: GraphQLString },
         bruto: { type: GraphQLFloat },
         neto: { type: GraphQLFloat },
@@ -83,6 +85,7 @@ const techCardInputDataType = new GraphQLInputObjectType({
 const TechCardType = new GraphQLObjectType({
     name: 'TechCard',
     fields: () => ({
+        recipeNumber: { type: GraphQLString },
         nameOfCard: { type: GraphQLString },
         description: { type: GraphQLString },
         data: { type: new GraphQLList(techCardDataType) },
@@ -113,11 +116,18 @@ const ProductType = new GraphQLObjectType({
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
-        TechCard: {
+        TechCardByName: {
             type: TechCardType,
             args: { nameOfCard: { type: GraphQLString } },
             resolve(parentValue, args) {
                 return TechCard.findOne({ nameOfCard: args.nameOfCard })
+            }
+        },
+        TechCardByRecipeNumber: {
+            type: TechCardType,
+            args: { recipeNumber: { type: GraphQLString } },
+            resolve(parentValue, args) {
+                return TechCard.findOne({ recipeNumber: args.recipeNumber })
             }
         },
         TechCards: {
@@ -137,6 +147,20 @@ const RootQuery = new GraphQLObjectType({
             resolve(parentValue, args) {
                 return Product.find({})
             }
+        },
+        ProductByCode: {
+            type: ProductType,
+            args: { code: { type: GraphQLString } },
+            resolve(parentValue, args) {
+                return Product.findOne({ code: args.code })
+            }
+        },
+        ProductByName: {
+            type: ProductType,
+            args: { nameOfProduct: { type: GraphQLString } },
+            resolve(parentValue, args) {
+                return Product.findOne({ nameOfProduct: args.nameOfProduct })
+            }
         }
     }
 });
@@ -148,6 +172,7 @@ const Mutation = new GraphQLObjectType({
             type: TechCardType,
             args: {
                 //GraphQLNonNull make these field required
+                recipeNumber: { type: new GraphQLNonNull(GraphQLString) },
                 nameOfCard: { type: new GraphQLNonNull(GraphQLString) },
                 description: { type: new GraphQLNonNull(GraphQLString) },
                 data: { type: new GraphQLList(techCardInputDataType) },
@@ -159,6 +184,7 @@ const Mutation = new GraphQLObjectType({
             },
             resolve(parent, args) {
                 let newTechCard = new TechCard({
+                    recipeNumber: args.recipeNumber,
                     nameOfCard: args.nameOfCard,
                     description: args.description,
                     data: args.data,
