@@ -5,6 +5,7 @@ import Menu from './components/Menu.js';
 import CreateTechCard from './components/CreateTechCard.js';
 import CreateMenu from './components/CreateMenu.js';
 import SendDoc from './components/SendDoc.js';
+import CreateProduct from './components/CreateProduct.js';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme, makeStyles } from '@material-ui/core/styles';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
@@ -26,6 +27,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <Router>
           <Switch>
+            <Route path="/createProduct">
+              <CreateProduct />
+            </Route>
             <Route path="/createTechCard">
               <CreateTechCard />
             </Route>
@@ -41,7 +45,6 @@ function App() {
             <Route path="/">
               <Login />
             </Route>
-
           </Switch>
         </Router>
       </ThemeProvider>

@@ -20,6 +20,17 @@
     overflow: auto;
 }
 
+.CreateProduct {
+    background-color: #F95F83;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    font-size: calc(10px + 2vmin);
+    overflow: auto;
+}
+
 .Container1 {
   flex: 1 0 5%;
   margin-left: 25px;

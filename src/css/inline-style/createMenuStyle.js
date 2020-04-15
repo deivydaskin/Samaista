@@ -20,7 +20,18 @@ export const useStyles = makeStyles(theme => ({
         color: '#FFFFFF',
         border: '1px solid #FFFFFF',
         padding: '5px',
-    }
+    },
+    select: {
+        '&:before': {
+            borderColor: "#FFFFFF",
+        },
+        '&:after': {
+            borderColor: "#FFFFFF",
+        }
+    },
+    icon: {
+        fill: "#FFFFFF",
+    },
 }));
 
 export const styles = theme => ({

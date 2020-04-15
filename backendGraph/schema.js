@@ -8,8 +8,9 @@ const {
     GraphQLFloat,
     GraphQLInputObjectType
 } = require('graphql');
-const Menu = require('./models/Menu');
-const TechCard = require('./models/TechCard');
+const Menu = require('./models/Menu.js');
+const TechCard = require('./models/TechCard.js');
+const Product = require('./models/Product.js');
 
 const menuDataType = new GraphQLObjectType({
     name: 'menuData',
@@ -93,6 +94,21 @@ const TechCardType = new GraphQLObjectType({
     })
 });
 
+const ProductType = new GraphQLObjectType({
+    name: 'Product',
+    fields: () => ({
+        code: { type: GraphQLInt },
+        nameOfProduct: { type: GraphQLString },
+        bruto: { type: GraphQLFloat },
+        neto: { type: GraphQLFloat },
+        b: { type: GraphQLFloat },
+        r: { type: GraphQLFloat },
+        a: { type: GraphQLFloat },
+        kcal: { type: GraphQLFloat },
+        category: { type: GraphQLString }
+    })
+});
+
 // Root Query
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
@@ -114,6 +130,12 @@ const RootQuery = new GraphQLObjectType({
             type: new GraphQLList(MenuType),
             resolve(parentValue, args) {
                 return Menu.find({})
+            }
+        },
+        Products: {
+            type: new GraphQLList(ProductType),
+            resolve(parentValue, args) {
+                return Product.find({})
             }
         }
     }
@@ -172,6 +194,34 @@ const Mutation = new GraphQLObjectType({
                 return newMenu.save();
             }
         },
+        addProduct: {
+            type: ProductType,
+            args: {
+                code: { type: new GraphQLNonNull(GraphQLInt) },
+                nameOfProduct: { type: new GraphQLNonNull(GraphQLString) },
+                bruto: { type: new GraphQLNonNull(GraphQLFloat) },
+                neto: { type: new GraphQLNonNull(GraphQLFloat) },
+                b: { type: new GraphQLNonNull(GraphQLFloat) },
+                r: { type: new GraphQLNonNull(GraphQLFloat) },
+                a: { type: new GraphQLNonNull(GraphQLFloat) },
+                kcal: { type: new GraphQLNonNull(GraphQLFloat) },
+                category: { type: new GraphQLNonNull(GraphQLString) }
+            },
+            resolve(parent, args) {
+                let newProduct = new Product({
+                    code: args.code,
+                    nameOfProduct: args.nameOfProduct,
+                    bruto: args.bruto,
+                    neto: args.neto,
+                    b: args.b,
+                    r: args.r,
+                    a: args.a,
+                    kcal: args.kcal,
+                    category: args.category
+                });
+                return newProduct.save();
+            }
+        }
     }
 });
 
