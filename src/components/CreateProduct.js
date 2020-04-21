@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../css/createMenu.css';
+import '../css/createProduct.css';
 import Button from '@material-ui/core/Button';
 import { withRouter } from 'react-router-dom';
 import Table from '@material-ui/core/Table';

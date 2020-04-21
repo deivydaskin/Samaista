@@ -1,0 +1,44 @@
+.CreateTechCard {
+    background-color: #F95F83;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    font-size: calc(10px + 2vmin);
+    overflow: auto;
+}
+
+.Container1 {
+    /* flex: 1 0 5%; */
+    flex: none;
+    margin-left: 25px;
+    margin-top: 25px;
+    align-self: flex-start;
+  }
+  
+  .Container2 {
+    /* flex: 1 0 5%; */
+    flex: none;
+    margin-top: 0px;
+    min-height: 0;
+  }
+  .Container3 {
+    /* flex: 1 0 5%; */
+    flex: none;
+    min-height: 0;
+    color: #FFFFFF;
+    margin-top: 50px;
+  }
+  .Container4 {
+    /* flex: 1 0 60%; */
+    flex: 1;
+    min-height: 0;
+  }
+  .Container5 {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }

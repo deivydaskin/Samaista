@@ -15,7 +15,7 @@ const Product = require('./models/Product.js');
 const menuDataType = new GraphQLObjectType({
     name: 'menuData',
     fields: () => ({
-        number: { type: GraphQLFloat },
+        recipeNumber: { type: GraphQLString },
         name: { type: GraphQLString },
         yield: { type: GraphQLString },
         b: { type: GraphQLFloat },
@@ -29,18 +29,28 @@ const MenuType = new GraphQLObjectType({
     name: 'Menu',
     fields: () => ({
         nameOfMenu: { type: GraphQLString },
-        data: { type: new GraphQLList(menuDataType) },
-        overallB: { type: GraphQLFloat },
-        overallR: { type: GraphQLFloat },
-        overallA: { type: GraphQLFloat },
-        overallKcal: { type: GraphQLFloat },
+        breakfastData: { type: new GraphQLList(menuDataType) },
+        breakfastOverallB: { type: GraphQLFloat },
+        breakfastOverallR: { type: GraphQLFloat },
+        breakfastOverallA: { type: GraphQLFloat },
+        breakfastOverallKcal: { type: GraphQLFloat },
+        lunchData: { type: new GraphQLList(menuDataType) },
+        lunchOverallB: { type: GraphQLFloat },
+        lunchOverallR: { type: GraphQLFloat },
+        lunchOverallA: { type: GraphQLFloat },
+        lunchOverallKcal: { type: GraphQLFloat },
+        dinnerData: { type: new GraphQLList(menuDataType) },
+        dinnerOverallB: { type: GraphQLFloat },
+        dinnerOverallR: { type: GraphQLFloat },
+        dinnerOverallA: { type: GraphQLFloat },
+        dinnerOverallKcal: { type: GraphQLFloat }
     })
 });
 
 const menuInputDataType = new GraphQLInputObjectType({
     name: 'MenuInputData',
     fields: () => ({
-        number: { type: GraphQLFloat },
+        recipeNumber: { type: GraphQLString },
         name: { type: GraphQLString },
         yield: { type: GraphQLString },
         bruto: { type: GraphQLFloat },
@@ -202,20 +212,40 @@ const Mutation = new GraphQLObjectType({
             args: {
                 //GraphQLNonNull make these field required
                 nameOfMenu: { type: new GraphQLNonNull(GraphQLString) },
-                data: { type: new GraphQLList(menuInputDataType) },
-                overallB: { type: new GraphQLNonNull(GraphQLFloat) },
-                overallR: { type: new GraphQLNonNull(GraphQLFloat) },
-                overallA: { type: new GraphQLNonNull(GraphQLFloat) },
-                overallKcal: { type: new GraphQLNonNull(GraphQLFloat) },
+                breakfastData: { type: new GraphQLList(menuInputDataType) },
+                breakfastOverallB: { type: new GraphQLNonNull(GraphQLFloat) },
+                breakfastOverallR: { type: new GraphQLNonNull(GraphQLFloat) },
+                breakfastOverallA: { type: new GraphQLNonNull(GraphQLFloat) },
+                breakfastOverallKcal: { type: new GraphQLNonNull(GraphQLFloat) },
+                lunchData: { type: new GraphQLList(menuInputDataType) },
+                lunchOverallB: { type: new GraphQLNonNull(GraphQLFloat) },
+                lunchOverallR: { type: new GraphQLNonNull(GraphQLFloat) },
+                lunchOverallA: { type: new GraphQLNonNull(GraphQLFloat) },
+                lunchOverallKcal: { type: new GraphQLNonNull(GraphQLFloat) },
+                dinnerData: { type: new GraphQLList(menuInputDataType) },
+                dinnerOverallB: { type: new GraphQLNonNull(GraphQLFloat) },
+                dinnerOverallR: { type: new GraphQLNonNull(GraphQLFloat) },
+                dinnerOverallA: { type: new GraphQLNonNull(GraphQLFloat) },
+                dinnerOverallKcal: { type: new GraphQLNonNull(GraphQLFloat) }
             },
             resolve(parent, args) {
                 let newMenu = new Menu({
                     nameOfMenu: args.nameOfMenu,
-                    data: args.data,
-                    overallB: args.overallB,
-                    overallR: args.overallR,
-                    overallA: args.overallA,
-                    overallKcal: args.overallKcal,
+                    breakfastData: args.breakfastData,
+                    breakfastOverallB: args.breakfastOverallB,
+                    breakfastOverallR: args.breakfastOverallR,
+                    breakfastOverallA: args.breakfastOverallA,
+                    breakfastOverallKcal: args.breakfastOverallKcal,
+                    lunchData: args.lunchData,
+                    lunchOverallB: args.lunchOverallB,
+                    lunchOverallR: args.lunchOverallR,
+                    lunchOverallA: args.lunchOverallA,
+                    lunchOverallKcal: args.lunchOverallKcal,
+                    dinnerData: args.dinnerData,
+                    dinnerOverallB: args.dinnerOverallB,
+                    dinnerOverallR: args.dinnerOverallR,
+                    dinnerOverallA: args.dinnerOverallA,
+                    dinnerOverallKcal: args.dinnerOverallKcal
                 });
                 return newMenu.save();
             }
