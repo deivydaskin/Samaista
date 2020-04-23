@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from 'react';
-//import '../css/createMenu.css';
 import Button from '@material-ui/core/Button';
 import { withRouter } from 'react-router-dom';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
 import TextFieldMui from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import axios from 'axios';
-import TextField from '@material-ui/core/TextField';
 import SearchIcon from '@material-ui/icons/Search';
-import { useStyles } from '../css/inline-style/createMenuStyle.js';
-import { styles } from '../css/inline-style/createMenuStyle.js';
+import { useStyles } from '../../css/inline-style/createMenuStyle.js';
+import { styles } from '../../css/inline-style/createMenuStyle.js';
 import { Container } from '@material-ui/core';
-import InputBase from '@material-ui/core/InputBase';
 
 const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
     return (
@@ -40,19 +35,18 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
     );
 });
 
-function Breakfast(props) {
+function Dinner(props) {
+
     const classes = useStyles();
 
     const handleChange = i => e => {
-        let newArr = { ...props.breakfastState };
-        if (e.target.id === "nameOfMenu") {
-            newArr.nameOfMenu = e.target.value;
-        } else if (e.target.id === "name") {
-            newArr.breakfastData[i][e.target.id] = e.target.value;
+        let newArr = { ...props.dinnerState };
+        if (e.target.id === "name") {
+            newArr.dinnerData[i][e.target.id] = e.target.value;
         } else if (e.target.id === "recipeNumber") {
-            newArr.breakfastData[i][e.target.id] = e.target.value;
+            newArr.dinnerData[i][e.target.id] = e.target.value;
         }
-        props.setBreakfastState(newArr);
+        props.setDinnerState(newArr);
 
 
         if (e.target.id === "b" || e.target.id === "r" || e.target.id === "a" || e.target.id === "kcal") {
@@ -83,14 +77,14 @@ function Breakfast(props) {
                 }
             })
                 .then((response) => {
-                    let newArr = { ...props.breakfastState };
-                    newArr.breakfastData[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
-                    newArr.breakfastData[i].b = response.data.data.TechCardByName.overallB;
-                    newArr.breakfastData[i].r = response.data.data.TechCardByName.overallR;
-                    newArr.breakfastData[i].a = response.data.data.TechCardByName.overallA;
-                    newArr.breakfastData[i].kcal = response.data.data.TechCardByName.overallKcal;
-                    newArr.breakfastData[i].yield = response.data.data.TechCardByName.yield;
-                    props.setBreakfastState(newArr);
+                    let newArr = { ...props.dinnerState };
+                    newArr.dinnerData[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
+                    newArr.dinnerData[i].b = response.data.data.TechCardByName.overallB;
+                    newArr.dinnerData[i].r = response.data.data.TechCardByName.overallR;
+                    newArr.dinnerData[i].a = response.data.data.TechCardByName.overallA;
+                    newArr.dinnerData[i].kcal = response.data.data.TechCardByName.overallKcal;
+                    newArr.dinnerData[i].yield = response.data.data.TechCardByName.yield;
+                    props.setDinnerState(newArr);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -116,15 +110,15 @@ function Breakfast(props) {
                 }
             })
                 .then((response) => {
-                    let newArr = { ...props.breakfastState };
-                    newArr.breakfastData[i].name = response.data.data.TechCardByRecipeNumber.nameOfCard;
-                    newArr.breakfastData[i].recipeNumber = response.data.data.TechCardByRecipeNumber.recipeNumber;
-                    newArr.breakfastData[i].b = response.data.data.TechCardByRecipeNumber.overallB;
-                    newArr.breakfastData[i].r = response.data.data.TechCardByRecipeNumber.overallR;
-                    newArr.breakfastData[i].a = response.data.data.TechCardByRecipeNumber.overallA;
-                    newArr.breakfastData[i].kcal = response.data.data.TechCardByRecipeNumber.overallKcal;
-                    newArr.breakfastData[i].yield = response.data.data.TechCardByRecipeNumber.yield;
-                    props.setBreakfastState(newArr);
+                    let newArr = { ...props.dinnerState };
+                    newArr.dinnerData[i].name = response.data.data.TechCardByRecipeNumber.nameOfCard;
+                    newArr.dinnerData[i].recipeNumber = response.data.data.TechCardByRecipeNumber.recipeNumber;
+                    newArr.dinnerData[i].b = response.data.data.TechCardByRecipeNumber.overallB;
+                    newArr.dinnerData[i].r = response.data.data.TechCardByRecipeNumber.overallR;
+                    newArr.dinnerData[i].a = response.data.data.TechCardByRecipeNumber.overallA;
+                    newArr.dinnerData[i].kcal = response.data.data.TechCardByRecipeNumber.overallKcal;
+                    newArr.dinnerData[i].yield = response.data.data.TechCardByRecipeNumber.yield;
+                    props.setDinnerState(newArr);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -134,31 +128,31 @@ function Breakfast(props) {
 
     function countOverall() {
 
-        let newArr = { ...props.breakfastState };
-        newArr.breakfastOverallB = 0;
-        newArr.breakfastOverallR = 0;
-        newArr.breakfastOverallA = 0;
-        newArr.breakfastOverallKcal = 0;
-        for (let i = 0; i < props.breakfastState.breakfastData.length; i++) {
-            newArr.breakfastOverallB += props.breakfastState.breakfastData[i].b;
-            newArr.breakfastOverallR += props.breakfastState.breakfastData[i].r;
-            newArr.breakfastOverallA += props.breakfastState.breakfastData[i].a;
-            newArr.breakfastOverallKcal += props.breakfastState.breakfastData[i].kcal;
+        let newArr = { ...props.dinnerState };
+        newArr.dinnerOverallB = 0;
+        newArr.dinnerOverallR = 0;
+        newArr.dinnerOverallA = 0;
+        newArr.dinnerOverallKcal = 0;
+        for (let i = 0; i < props.dinnerState.dinnerData.length; i++) {
+            newArr.dinnerOverallB += props.dinnerState.dinnerData[i].b;
+            newArr.dinnerOverallR += props.dinnerState.dinnerData[i].r;
+            newArr.dinnerOverallA += props.dinnerState.dinnerData[i].a;
+            newArr.dinnerOverallKcal += props.dinnerState.dinnerData[i].kcal;
         }
-        props.setBreakfastState(newArr);
+        props.setDinnerState(newArr);
     }
 
     function addRow() {
-        let margin = parseInt(document.getElementById("firstMargin").style.marginTop);
+        let margin = parseInt(document.getElementById("marginTop").style.marginTop);
         if (margin) {
             margin = margin + 70;
         } else {
             margin = 870;
         }
-        document.getElementById("firstMargin").style.marginTop = margin + "px";
+        document.getElementById("marginTop").style.marginTop = margin + "px";
 
-        let newArr = { ...props.breakfastState };
-        newArr.breakfastData.push({
+        let newArr = { ...props.dinnerState };
+        newArr.dinnerData.push({
             name: "",
             yield: '',
             b: null,
@@ -166,26 +160,15 @@ function Breakfast(props) {
             a: null,
             kcal: null
         })
-        props.setBreakfastState(newArr);
+        props.setDinnerState(newArr);
     }
 
     return (
-        <div className="CreateBreakfast">
-            <div className="Container1">
-                <div className="backBtnContainer">
-                    <Button variant="contained" color="secondary" className="backBtn" onClick={() => props.history.push('/menu')}>Atgal</Button>
-                </div>
-            </div>
+        <div className="CreateDinner">
             <div className="Container5">
-                <h3 style={{ color: "#FFFFFF" }}>Valgiaraštis</h3>
+                <h3 style={{ color: "#FFFFFF" }}>Vakarienė</h3>
             </div>
-            <div className="Container5">
-                <InputBase id="nameOfMenu" label="Pavadinimas" value={props.breakfastState.nameOfMenu} style={{ marginBottom: "20px", minWidth: 500, color: "#FFFFFF" }} className={classes.input} onChange={handleChange()} />
-            </div>
-            <div className="Container5">
-                <h3 style={{ color: "#FFFFFF" }}>Pusryčiai</h3>
-            </div>
-            <div className="Container">
+            <div className="Container4">
                 <Container classes={classes.root} maxWidth="lg">
                     <Table className={classes.table} aria-label="spanning table">
                         <TableHead>
@@ -206,7 +189,7 @@ function Breakfast(props) {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {props.breakfastState.breakfastData.map((row, i) => (
+                            {props.dinnerState.dinnerData.map((row, i) => (
                                 <TableRow key={i}>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
@@ -266,21 +249,21 @@ function Breakfast(props) {
                             ))}
                             <TableRow>
                                 <TableCell align="right" colSpan={3} className={classes.border}>Iš viso:</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallB}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallR}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallA}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallKcal}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.dinnerState.dinnerOverallB}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.dinnerState.dinnerOverallR}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.dinnerState.dinnerOverallA}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.dinnerState.dinnerOverallKcal}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
                 </Container>
 
                 <div className="Container5">
-                    <Button onClick={addRow} variant="contained" color="secondary" className={classes.button}>Pridėti eilutę</Button>
+                    <Button onClick={addRow} variant="contained" color={props.btnColor} className={classes.button}>Pridėti eilutę</Button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
-export default withRouter(Breakfast);
+export default withRouter(Dinner);

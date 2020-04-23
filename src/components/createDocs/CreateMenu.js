@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import '../css/createMenu.css';
+import '../../css/createMenu.css';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import Breakfast from './Breakfast.js';
 import Lunch from './Lunch.js';
 import Dinner from './Dinner.js';
 import Button from '@material-ui/core/Button';
-import { useStyles } from '../css/inline-style/createMenuStyle.js';
+import { useStyles } from '../../css/inline-style/createMenuStyle.js';
 
-function CreateMenu() {
+function CreateMenu(props) {
     const classes = useStyles();
     const [breakfastState, setBreakfastState] = useState({
         nameOfMenu: "Pavadinimas",
@@ -80,7 +80,7 @@ function CreateMenu() {
                             breakfastOverallR: ${breakfastState.breakfastOverallR}, breakfastOverallA: ${breakfastState.breakfastOverallA}, breakfastOverallKcal: ${breakfastState.breakfastOverallKcal},
                             lunchData: ${lunchUnquoted}, lunchOverallB: ${lunchState.lunchOverallB}, 
                             lunchOverallR: ${lunchState.lunchOverallR}, lunchOverallA: ${lunchState.lunchOverallA}, lunchOverallKcal: ${lunchState.lunchOverallKcal},
-                            dinnerData: ${dinnerUnquoted}, dinnerOverallB: ${lunchState.lunchOverallB}, 
+                            dinnerData: ${dinnerUnquoted}, dinnerOverallB: ${dinnerState.dinnerOverallB}, 
                             dinnerOverallR: ${dinnerState.dinnerOverallR}, dinnerOverallA: ${dinnerState.dinnerOverallA}, dinnerOverallKcal: ${dinnerState.dinnerOverallKcal}
                             ){
                                 nameOfMenu
@@ -113,18 +113,25 @@ function CreateMenu() {
 
     return (
         <div className="CreateMenu">
-            <div className="first" id="firstMargin">
-                <Breakfast setBreakfastState={setBreakfastState} breakfastState={breakfastState} />
+            <div className="marginTop" id="marginTop">
+                <div className="backBtnContainer">
+                    <Button variant="contained" color="secondary" className="backBtn" onClick={() => props.history.push('/menu')}>Atgal</Button>
+                </div>
             </div>
-            <div className="second" >
-                <Lunch setLunchState={setLunchState} lunchState={lunchState} />
+            <div className="MenuContainer">
+                <div className="first" id="firstMargin">
+                    <Breakfast setBreakfastState={setBreakfastState} breakfastState={breakfastState} btnColor="secondary" />
+                </div>
+                <div className="second" >
+                    <Lunch setLunchState={setLunchState} lunchState={lunchState} btnColor="secondary" />
+                </div>
+                <div className="third" >
+                    <Dinner setDinnerState={setDinnerState} dinnerState={dinnerState} btnColor="secondary" />
+                </div>
             </div>
-            <div className="third" >
-                <Dinner setDinnerState={setDinnerState} dinnerState={dinnerState} />
-            </div>
-            <div>
-                <Button onClick={saveDoc} variant="contained" color="secondary" className={classes.button} style={{ alignSelf: "flex-end", marginRight: '30px' }}>Išsaugoti</Button>
-            </div>
+
+            <Button onClick={saveDoc} variant="contained" color="secondary" className={classes.button} style={{ alignSelf: "center" }}>Išsaugoti</Button>
+
         </div >
     );
 }

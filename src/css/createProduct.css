@@ -17,22 +17,18 @@
     align-self: flex-start;
   }
   
-  .Container2 {
-    /* flex: 1 0 5%; */
-    flex: none;
-    margin-top: 0px;
+  .createProductName {
+    margin-top: auto;
     min-height: 0;
   }
   .Container3 {
-    /* flex: 1 0 5%; */
     flex: none;
     min-height: 0;
     color: #FFFFFF;
     margin-top: 50px;
   }
-  .Container4 {
-    /* flex: 1 0 60%; */
-    flex: 1;
+  .createProductTable {
+    margin-bottom: auto;
     min-height: 0;
   }
   .Container5 {

@@ -31,12 +31,12 @@ function Menu(props) {
             props.history.push('/createMenu')
         } else if (e === "product") {
             props.history.push('/createProduct')
-        } else if (e === "techCard") {
-            props.history.push('/createTechCard')
-        } else if (e === "techCard") {
-            props.history.push('/createTechCard')
-        } else if (e === "techCard") {
-            props.history.push('/createTechCard')
+        } else if (e === "viewProducts") {
+            props.history.push('/viewProducts')
+        } else if (e === "viewTechCards") {
+            props.history.push('/viewTechCards')
+        } else if (e === "viewMenu") {
+            props.history.push('/viewMenu')
         } else if (e === "logout") {
             props.history.push('/')
         }
@@ -65,13 +65,13 @@ function Menu(props) {
                 </Button>
                 <img src={process.env.PUBLIC_URL + '/statistics.png'} />
                 <div className="buttonBox">
-                    <Button id="CreateDoc" variant="outlined" color="primary" className={classes.button} onClick={() => handleSubmit("CreateDoc")}>
+                    <Button id="viewMenu" variant="outlined" color="primary" className={classes.button} onClick={() => handleSubmit("viewMenu")}>
                         Valgiaraščius
                 </Button>
-                    <Button id="CreateDoc" variant="outlined" color="primary" className={classes.button} onClick={() => handleSubmit("CreateDoc")}>
+                    <Button id="viewTechCards" variant="outlined" color="primary" className={classes.button} onClick={() => handleSubmit("viewTechCards")}>
                         Techn. korteles
                 </Button>
-                    <Button id="CreateDoc" variant="outlined" color="primary" className={classes.button} onClick={() => handleSubmit("CreateDoc")}>
+                    <Button id="viewProducts" variant="outlined" color="primary" className={classes.button} onClick={() => handleSubmit("viewProducts")}>
                         Produktus
                 </Button>
                 </div>

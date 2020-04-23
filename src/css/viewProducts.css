@@ -1,0 +1,45 @@
+.viewProducts {
+    background-color: #4687FF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    font-size: calc(10px + 2vmin);
+    overflow: auto;
+}
+
+.viewTechCard {
+    background-color: #4687FF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    font-size: calc(10px + 2vmin);
+    overflow: auto;
+}
+
+.viewMenu {
+    background-color: #4687FF;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.backBtn {
+    flex: none;
+    margin-left: 25px;
+    margin-top: 25px;
+    align-self: flex-start;
+}
+
+.product {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.editProductButtons{
+    display: flex;
+    justify-content: flex-end;
+}

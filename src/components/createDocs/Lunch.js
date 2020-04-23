@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import '../../css/createMenu.css';
 import Button from '@material-ui/core/Button';
 import { withRouter } from 'react-router-dom';
 import Table from '@material-ui/core/Table';
@@ -10,8 +11,8 @@ import TextFieldMui from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import axios from 'axios';
 import SearchIcon from '@material-ui/icons/Search';
-import { useStyles } from '../css/inline-style/createMenuStyle.js';
-import { styles } from '../css/inline-style/createMenuStyle.js';
+import { useStyles } from '../../css/inline-style/createMenuStyle.js';
+import { styles } from '../../css/inline-style/createMenuStyle.js';
 import { Container } from '@material-ui/core';
 
 const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
@@ -35,18 +36,17 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
     );
 });
 
-function Dinner(props) {
-
+function Lunch(props) {
     const classes = useStyles();
 
     const handleChange = i => e => {
-        let newArr = { ...props.dinnerState };
+        let newArr = { ...props.lunchState };
         if (e.target.id === "name") {
-            newArr.dinnerData[i][e.target.id] = e.target.value;
+            newArr.lunchData[i][e.target.id] = e.target.value;
         } else if (e.target.id === "recipeNumber") {
-            newArr.dinnerData[i][e.target.id] = e.target.value;
+            newArr.lunchData[i][e.target.id] = e.target.value;
         }
-        props.setDinnerState(newArr);
+        props.setLunchState(newArr);
 
 
         if (e.target.id === "b" || e.target.id === "r" || e.target.id === "a" || e.target.id === "kcal") {
@@ -77,14 +77,14 @@ function Dinner(props) {
                 }
             })
                 .then((response) => {
-                    let newArr = { ...props.dinnerState };
-                    newArr.dinnerData[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
-                    newArr.dinnerData[i].b = response.data.data.TechCardByName.overallB;
-                    newArr.dinnerData[i].r = response.data.data.TechCardByName.overallR;
-                    newArr.dinnerData[i].a = response.data.data.TechCardByName.overallA;
-                    newArr.dinnerData[i].kcal = response.data.data.TechCardByName.overallKcal;
-                    newArr.dinnerData[i].yield = response.data.data.TechCardByName.yield;
-                    props.setDinnerState(newArr);
+                    let newArr = { ...props.lunchState };
+                    newArr.lunchData[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
+                    newArr.lunchData[i].b = response.data.data.TechCardByName.overallB;
+                    newArr.lunchData[i].r = response.data.data.TechCardByName.overallR;
+                    newArr.lunchData[i].a = response.data.data.TechCardByName.overallA;
+                    newArr.lunchData[i].kcal = response.data.data.TechCardByName.overallKcal;
+                    newArr.lunchData[i].yield = response.data.data.TechCardByName.yield;
+                    props.setLunchState(newArr);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -110,15 +110,15 @@ function Dinner(props) {
                 }
             })
                 .then((response) => {
-                    let newArr = { ...props.dinnerState };
-                    newArr.dinnerData[i].name = response.data.data.TechCardByRecipeNumber.nameOfCard;
-                    newArr.dinnerData[i].recipeNumber = response.data.data.TechCardByRecipeNumber.recipeNumber;
-                    newArr.dinnerData[i].b = response.data.data.TechCardByRecipeNumber.overallB;
-                    newArr.dinnerData[i].r = response.data.data.TechCardByRecipeNumber.overallR;
-                    newArr.dinnerData[i].a = response.data.data.TechCardByRecipeNumber.overallA;
-                    newArr.dinnerData[i].kcal = response.data.data.TechCardByRecipeNumber.overallKcal;
-                    newArr.dinnerData[i].yield = response.data.data.TechCardByRecipeNumber.yield;
-                    props.setDinnerState(newArr);
+                    let newArr = { ...props.lunchState };
+                    newArr.lunchData[i].name = response.data.data.TechCardByRecipeNumber.nameOfCard;
+                    newArr.lunchData[i].recipeNumber = response.data.data.TechCardByRecipeNumber.recipeNumber;
+                    newArr.lunchData[i].b = response.data.data.TechCardByRecipeNumber.overallB;
+                    newArr.lunchData[i].r = response.data.data.TechCardByRecipeNumber.overallR;
+                    newArr.lunchData[i].a = response.data.data.TechCardByRecipeNumber.overallA;
+                    newArr.lunchData[i].kcal = response.data.data.TechCardByRecipeNumber.overallKcal;
+                    newArr.lunchData[i].yield = response.data.data.TechCardByRecipeNumber.yield;
+                    props.setLunchState(newArr);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -128,31 +128,31 @@ function Dinner(props) {
 
     function countOverall() {
 
-        let newArr = { ...props.dinnerState };
-        newArr.dinnerOverallB = 0;
-        newArr.dinnerOverallR = 0;
-        newArr.dinnerOverallA = 0;
-        newArr.dinnerOverallKcal = 0;
-        for (let i = 0; i < props.dinnerState.dinnerData.length; i++) {
-            newArr.dinnerOverallB += props.dinnerState.dinnerData[i].b;
-            newArr.dinnerOverallR += props.dinnerState.dinnerData[i].r;
-            newArr.dinnerOverallA += props.dinnerState.dinnerData[i].a;
-            newArr.dinnerOverallKcal += props.dinnerState.dinnerData[i].kcal;
+        let newArr = { ...props.lunchState };
+        newArr.lunchOverallB = 0;
+        newArr.lunchOverallR = 0;
+        newArr.lunchOverallA = 0;
+        newArr.lunchOverallKcal = 0;
+        for (let i = 0; i < props.lunchState.lunchData.length; i++) {
+            newArr.lunchOverallB += props.lunchState.lunchData[i].b;
+            newArr.lunchOverallR += props.lunchState.lunchData[i].r;
+            newArr.lunchOverallA += props.lunchState.lunchData[i].a;
+            newArr.lunchOverallKcal += props.lunchState.lunchData[i].kcal;
         }
-        props.setDinnerState(newArr);
+        props.setLunchState(newArr);
     }
 
     function addRow() {
-        let margin = parseInt(document.getElementById("firstMargin").style.marginTop);
+        let margin = parseInt(document.getElementById("marginTop").style.marginTop);
         if (margin) {
             margin = margin + 70;
         } else {
             margin = 870;
         }
-        document.getElementById("firstMargin").style.marginTop = margin + "px";
+        document.getElementById("marginTop").style.marginTop = margin + "px";
 
-        let newArr = { ...props.dinnerState };
-        newArr.dinnerData.push({
+        let newArr = { ...props.lunchState };
+        newArr.lunchData.push({
             name: "",
             yield: '',
             b: null,
@@ -160,13 +160,13 @@ function Dinner(props) {
             a: null,
             kcal: null
         })
-        props.setDinnerState(newArr);
+        props.setLunchState(newArr);
     }
 
     return (
-        <div className="CreateDinner">
+        <div className="CreateLunch">
             <div className="Container5">
-                <h3 style={{ color: "#FFFFFF" }}>Vakarienė</h3>
+                <h3 style={{ color: "#FFFFFF" }}>Pietūs</h3>
             </div>
             <div className="Container4">
                 <Container classes={classes.root} maxWidth="lg">
@@ -189,7 +189,7 @@ function Dinner(props) {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {props.dinnerState.dinnerData.map((row, i) => (
+                            {props.lunchState.lunchData.map((row, i) => (
                                 <TableRow key={i}>
                                     <TableCell className={classes.border}><TextField1
                                         inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
@@ -249,21 +249,21 @@ function Dinner(props) {
                             ))}
                             <TableRow>
                                 <TableCell align="right" colSpan={3} className={classes.border}>Iš viso:</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.dinnerState.dinnerOverallB}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.dinnerState.dinnerOverallR}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.dinnerState.dinnerOverallA}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.dinnerState.dinnerOverallKcal}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.lunchState.lunchOverallB}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.lunchState.lunchOverallR}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.lunchState.lunchOverallA}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.lunchState.lunchOverallKcal}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
                 </Container>
 
                 <div className="Container5">
-                    <Button onClick={addRow} variant="contained" color="secondary" className={classes.button}>Pridėti eilutę</Button>
+                    <Button onClick={addRow} variant="contained" color={props.btnColor} className={classes.button}>Pridėti eilutę</Button>
                 </div>
             </div>
         </div >
     );
 }
 
-export default withRouter(Dinner);
+export default withRouter(Lunch);

@@ -152,6 +152,13 @@ const RootQuery = new GraphQLObjectType({
                 return Menu.find({})
             }
         },
+        MenuByName: {
+            type: MenuType,
+            args: { nameOfMenu: { type: GraphQLString } },
+            resolve(parentValue, args) {
+                return Menu.findOne({ nameOfMenu: args.nameOfMenu })
+            }
+        },
         Products: {
             type: new GraphQLList(ProductType),
             resolve(parentValue, args) {
@@ -207,6 +214,51 @@ const Mutation = new GraphQLObjectType({
                 return newTechCard.save();
             }
         },
+        updateTechCard: {
+            type: TechCardType,
+            args: {
+                //GraphQLNonNull make these field required
+                recipeNumber: { type: new GraphQLNonNull(GraphQLString) },
+                nameOfCard: { type: new GraphQLNonNull(GraphQLString) },
+                description: { type: new GraphQLNonNull(GraphQLString) },
+                data: { type: new GraphQLList(techCardInputDataType) },
+                overallB: { type: new GraphQLNonNull(GraphQLFloat) },
+                overallR: { type: new GraphQLNonNull(GraphQLFloat) },
+                overallA: { type: new GraphQLNonNull(GraphQLFloat) },
+                overallKcal: { type: new GraphQLNonNull(GraphQLFloat) },
+                yield: { type: new GraphQLNonNull(GraphQLString) },
+            },
+            resolve(parent, args) {
+                return TechCard.findOneAndUpdate(
+                    { recipeNumber: args.recipeNumber },
+                    {
+                        $set: {
+                            recipeNumber: args.recipeNumber,
+                            nameOfCard: args.nameOfCard,
+                            description: args.description,
+                            data: args.data,
+                            overallB: args.overallB,
+                            overallR: args.overallR,
+                            overallA: args.overallA,
+                            overallKcal: args.overallKcal,
+                            yield: args.yield
+                        }
+                    }
+                )
+            }
+        },
+        deleteTechCard: {
+            type: TechCardType,
+            args: {
+                //GraphQLNonNull make these field required
+                recipeNumber: { type: new GraphQLNonNull(GraphQLString) },
+            },
+            resolve(parent, args) {
+                return TechCard.findOneAndDelete(
+                    { recipeNumber: args.recipeNumber }
+                )
+            }
+        },
         addMenu: {
             type: MenuType,
             args: {
@@ -250,6 +302,64 @@ const Mutation = new GraphQLObjectType({
                 return newMenu.save();
             }
         },
+        updateMenu: {
+            type: MenuType,
+            args: {
+                nameOfMenu: { type: new GraphQLNonNull(GraphQLString) },
+                breakfastData: { type: new GraphQLList(menuInputDataType) },
+                breakfastOverallB: { type: new GraphQLNonNull(GraphQLFloat) },
+                breakfastOverallR: { type: new GraphQLNonNull(GraphQLFloat) },
+                breakfastOverallA: { type: new GraphQLNonNull(GraphQLFloat) },
+                breakfastOverallKcal: { type: new GraphQLNonNull(GraphQLFloat) },
+                lunchData: { type: new GraphQLList(menuInputDataType) },
+                lunchOverallB: { type: new GraphQLNonNull(GraphQLFloat) },
+                lunchOverallR: { type: new GraphQLNonNull(GraphQLFloat) },
+                lunchOverallA: { type: new GraphQLNonNull(GraphQLFloat) },
+                lunchOverallKcal: { type: new GraphQLNonNull(GraphQLFloat) },
+                dinnerData: { type: new GraphQLList(menuInputDataType) },
+                dinnerOverallB: { type: new GraphQLNonNull(GraphQLFloat) },
+                dinnerOverallR: { type: new GraphQLNonNull(GraphQLFloat) },
+                dinnerOverallA: { type: new GraphQLNonNull(GraphQLFloat) },
+                dinnerOverallKcal: { type: new GraphQLNonNull(GraphQLFloat) }
+            },
+            resolve(parent, args) {
+                return Menu.findOneAndUpdate(
+                    { nameOfMenu: args.nameOfMenu },
+                    {
+                        $set: {
+                            nameOfMenu: args.nameOfMenu,
+                            breakfastData: args.breakfastData,
+                            breakfastOverallB: args.breakfastOverallB,
+                            breakfastOverallR: args.breakfastOverallR,
+                            breakfastOverallA: args.breakfastOverallA,
+                            breakfastOverallKcal: args.breakfastOverallKcal,
+                            lunchData: args.lunchData,
+                            lunchOverallB: args.lunchOverallB,
+                            lunchOverallR: args.lunchOverallR,
+                            lunchOverallA: args.lunchOverallA,
+                            lunchOverallKcal: args.lunchOverallKcal,
+                            dinnerData: args.dinnerData,
+                            dinnerOverallB: args.dinnerOverallB,
+                            dinnerOverallR: args.dinnerOverallR,
+                            dinnerOverallA: args.dinnerOverallA,
+                            dinnerOverallKcal: args.dinnerOverallKcal
+                        }
+                    }
+                )
+            }
+        },
+        deleteMenu: {
+            type: MenuType,
+            args: {
+                //GraphQLNonNull make these field required
+                nameOfMenu: { type: new GraphQLNonNull(GraphQLString) },
+            },
+            resolve(parent, args) {
+                return Menu.findOneAndDelete(
+                    { nameOfMenu: args.nameOfMenu }
+                )
+            }
+        },
         addProduct: {
             type: ProductType,
             args: {
@@ -276,6 +386,48 @@ const Mutation = new GraphQLObjectType({
                     category: args.category
                 });
                 return newProduct.save();
+            }
+        },
+        updateProduct: {
+            type: ProductType,
+            args: {
+                code: { type: new GraphQLNonNull(GraphQLInt) },
+                nameOfProduct: { type: new GraphQLNonNull(GraphQLString) },
+                bruto: { type: new GraphQLNonNull(GraphQLFloat) },
+                neto: { type: new GraphQLNonNull(GraphQLFloat) },
+                b: { type: new GraphQLNonNull(GraphQLFloat) },
+                r: { type: new GraphQLNonNull(GraphQLFloat) },
+                a: { type: new GraphQLNonNull(GraphQLFloat) },
+                kcal: { type: new GraphQLNonNull(GraphQLFloat) },
+                category: { type: new GraphQLNonNull(GraphQLString) }
+            },
+            resolve(parent, args) {
+                return Product.findOneAndUpdate(
+                    { code: args.code },
+                    {
+                        $set: {
+                            code: args.code,
+                            nameOfProduct: args.nameOfProduct,
+                            bruto: args.bruto,
+                            neto: args.neto,
+                            b: args.b,
+                            r: args.r,
+                            a: args.a,
+                            kcal: args.kcal,
+                            category: args.category
+                        }
+                    })
+            }
+        },
+        deleteProduct: {
+            type: ProductType,
+            args: {
+                code: { type: new GraphQLNonNull(GraphQLInt) }
+            },
+            resolve(parent, args) {
+                return Product.findOneAndDelete(
+                    { code: args.code }
+                )
             }
         }
     }

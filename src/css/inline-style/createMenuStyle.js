@@ -14,7 +14,12 @@ export const useStyles = makeStyles(theme => ({
     header: {
         border: '2px solid white',
         color: '#FFFFFF',
-        backgroundColor: 'rgba(254, 149, 173, 0.5)',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    },
+    blueHeader: {
+        border: '2px solid white',
+        color: '#FFFFFF',
+        backgroundColor: 'rgba(133,176,255, 0.5)',
     },
     input: {
         color: '#FFFFFF',
@@ -32,6 +37,19 @@ export const useStyles = makeStyles(theme => ({
     icon: {
         fill: "#FFFFFF",
     },
+    root: {
+        borderRadius: "5px",
+        color: "#FFFFFF"
+    },
+    demo: {
+        backgroundColor: "#4687FF",
+        minWidth: "500px",
+        overflow: 'auto',
+        maxHeight: 500,
+    },
+    title: {
+        margin: theme.spacing(4, 0, 2),
+    }
 }));
 
 export const styles = theme => ({

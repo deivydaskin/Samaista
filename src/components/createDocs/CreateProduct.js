@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import '../css/createProduct.css';
+import React, { useState } from 'react';
+import '../../css/createProduct.css';
 import Button from '@material-ui/core/Button';
 import { withRouter } from 'react-router-dom';
 import Table from '@material-ui/core/Table';
@@ -9,13 +9,11 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TextFieldMui from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
-import { data } from './DataUtil';
 import axios from 'axios';
-import { useStyles } from '../css/inline-style/createMenuStyle.js';
-import { styles } from '../css/inline-style/createMenuStyle.js';
+import { useStyles } from '../../css/inline-style/createMenuStyle.js';
+import { styles } from '../../css/inline-style/createMenuStyle.js';
 import { Container } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
@@ -127,10 +125,10 @@ function CreateProduct(props) {
                     <Button variant="contained" color="secondary" className="backBtn" onClick={() => props.history.push('/menu')}>Atgal</Button>
                 </div>
             </div>
-            <div className="Container2">
+            <div className="createProductName">
                 <h3 style={{ color: "#FFFFFF" }}>Produktas</h3>
             </div>
-            <div className="Container4">
+            <div className="createProductTable">
                 <Container classes={classes.root} maxWidth="lg">
                     <Table className={classes.table} aria-label="spanning table">
                         <TableHead>

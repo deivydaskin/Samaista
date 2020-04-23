@@ -9,6 +9,9 @@
     overflow: auto;
   }
 
+.MenuContainer {
+    flex: 1;
+}
 .Container1 {
     /* flex: 1 0 5%; */
     flex: none;
@@ -17,8 +20,13 @@
     align-self: flex-start;
 }
 
-.first {
+.marginTop {
   margin-top: 800px;
+  margin-left: 25px;
+  align-self: flex-start;
+}
+
+.first {
   flex: 1 0 auto;
 }
 .second {
