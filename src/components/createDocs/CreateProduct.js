@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../css/createProduct.css';
 import Button from '@material-ui/core/Button';
 import { withRouter } from 'react-router-dom';
@@ -16,6 +16,13 @@ import { Container } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import { useAuth0 } from "../../react-auth0-spa";
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 
 const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
@@ -40,16 +47,23 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
 });
 
 function CreateProduct(props) {
+    useEffect(() => {
+        getAllProducts();
+    }, [])
     const classes = useStyles();
+    const { getTokenSilently } = useAuth0();
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarText, setSnackbarText] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
     const [productDataState, setProductDataState] = useState({
         code: null,
         nameOfProduct: "",
-        bruto: null,
-        neto: null,
-        b: null,
-        r: null,
-        a: null,
-        kcal: null,
+        bruto: 0,
+        neto: 100,
+        b: 0,
+        r: 0,
+        a: 0,
+        kcal: 0,
         category: ""
     });
 
@@ -84,13 +98,24 @@ function CreateProduct(props) {
             newArr.code = e.target.value;
         }
         setProductDataState(newArr);
-
     }
 
-    function saveDoc() {
+    function handleSnackbar(action) {
+        if (action === "open") {
+            setSnackbarState(true);
+        } else if (action === "close") {
+            setSnackbarState(false);
+        }
+    }
+
+    async function saveDoc() {
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
                 mutation{
@@ -110,10 +135,54 @@ function CreateProduct(props) {
             }
         })
             .then((response) => {
-                console.log(response);
-                alert(response.statusText);
+                if (response.statusText === "OK" && !response.data.errors) {
+                    setSnackbarText("Produktas išsaugotas!");
+                    setSnackbarSeverity("success");
+                    handleSnackbar("open");
+                } else {
+                    setSnackbarText("Išsaugoti nepavyko!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                }
+                getAllProducts();
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
+                console.log(error);
+            });
+    }
+
+    async function getAllProducts() {
+        const token = await getTokenSilently();
+        axios({
+            url: 'http://localhost:3000/graphql',
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data: {
+                query: `
+            query{
+                Products {
+                  code
+                  nameOfProduct
+                }
+            }
+            `
+            }
+        })
+            .then((response) => {
+                console.log(response.data.data.Products.length + 1);
+                let temp = { ...productDataState }
+                temp.code = response.data.data.Products.length + 1
+                setProductDataState(temp);
+            })
+            .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
@@ -154,14 +223,14 @@ function CreateProduct(props) {
                             <TableRow>
                                 <TableCell className={classes.border}><TextField1
                                     inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
-                                    value={productDataState.code}
+                                    value={productDataState.code || ''}
                                     onChange={handleChange()}
                                     error
                                     id="code"
                                 /></TableCell>
                                 <TableCell className={classes.border}><TextField1
                                     inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
-                                    value={productDataState.nameOfProduct}
+                                    value={productDataState.nameOfProduct || ''}
                                     onChange={handleChange()}
                                     error
                                     id="nameOfProduct"
@@ -173,7 +242,7 @@ function CreateProduct(props) {
                                         step: '1',
                                         min: '0'
                                     }}
-                                    value={productDataState.bruto}
+                                    value={productDataState.bruto || ''}
                                     onChange={handleChange()}
                                     error
                                     id="bruto"
@@ -185,7 +254,7 @@ function CreateProduct(props) {
                                         step: '1',
                                         min: '0'
                                     }}
-                                    value={productDataState.neto}
+                                    value={productDataState.neto || ''}
                                     onChange={handleChange()}
                                     error
                                     id="neto"
@@ -197,7 +266,7 @@ function CreateProduct(props) {
                                         step: '0.01',
                                         min: '0'
                                     }}
-                                    value={productDataState.b}
+                                    value={productDataState.b || ''}
                                     onChange={handleChange()}
                                     error
                                     id="b"
@@ -209,7 +278,7 @@ function CreateProduct(props) {
                                         step: '0.01',
                                         min: '0'
                                     }}
-                                    value={productDataState.r}
+                                    value={productDataState.r || ''}
                                     onChange={handleChange()}
                                     error
                                     id="r"
@@ -221,7 +290,7 @@ function CreateProduct(props) {
                                         step: '0.01',
                                         min: '0'
                                     }}
-                                    value={productDataState.a}
+                                    value={productDataState.a || ''}
                                     onChange={handleChange()}
                                     error
                                     id="a"
@@ -234,7 +303,7 @@ function CreateProduct(props) {
                                             step: '0.01',
                                             min: '0'
                                         }}
-                                        value={productDataState.kcal}
+                                        value={productDataState.kcal || ''}
                                         onChange={handleChange()}
                                         error
                                         id="kcal"
@@ -264,10 +333,12 @@ function CreateProduct(props) {
                                                 <em>Nėra</em>
                                             </MenuItem>
                                             <MenuItem value="Kiauliena, kiaulienos subproduktai ir gaminiai">Kiauliena, kiaulienos subproduktai ir gaminiai</MenuItem>
-                                            <MenuItem value="Jautiena, jaulienos subproduktai ir gaminiai">Jautiena, jaulienos subproduktai ir gaminiai</MenuItem>
+                                            <MenuItem value="Jautiena, jautienos subproduktai ir gaminiai">Jautiena, jautienos subproduktai ir gaminiai</MenuItem>
+                                            <MenuItem value="Veršiena, veršienos subproduktai ir gaminiai">Veršiena, veršienos subproduktai ir gaminiai</MenuItem>
                                             <MenuItem value="Vištiena, vištienos subproduktai ir gaminiai">Vištiena, vištienos subproduktai ir gaminiai</MenuItem>
                                             <MenuItem value="Kalakutiena, kalakutienos subproduktai ir gaminiai">Kalakutiena, kalakutienos subproduktai ir gaminiai</MenuItem>
                                             <MenuItem value="Triušiena ">Triušiena</MenuItem>
+                                            <MenuItem value="Aviena, avienos subproduktai ir gaminiai">Aviena, avienos subproduktai ir gaminiai</MenuItem>
                                             <MenuItem value="Žuvis ir jūros gėrybės">Žuvis ir jūros gėrybės</MenuItem>
                                             <MenuItem value="Pienas ir jo gaminiai">Pienas ir jo gaminiai</MenuItem>
                                             <MenuItem value="Kiaušiniai">Kiaušiniai</MenuItem>
@@ -281,6 +352,7 @@ function CreateProduct(props) {
                                             <MenuItem value="Riešutai">Riešutai</MenuItem>
                                             <MenuItem value="Sėklos">Sėklos</MenuItem>
                                             <MenuItem value="Miltiniai gaminiai">Miltiniai gaminiai</MenuItem>
+                                            <MenuItem value="Vanduo">Vanduo</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </TableCell>
@@ -291,6 +363,12 @@ function CreateProduct(props) {
                 <div className="Container5">
                     <Button onClick={saveDoc} variant="contained" color="secondary" className={classes.button} style={{ alignSelf: "flex-end", marginRight: "30px" }}>Išsaugoti</Button>
                 </div>
+                <Snackbar open={snackbarState} autoHideDuration={6000} onClose={() => handleSnackbar("close")}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}>
+                    <Alert onClose={() => handleSnackbar("close")} severity={snackbarSeverity}>
+                        {snackbarText}
+                    </Alert>
+                </Snackbar>
             </div>
         </div>
     );

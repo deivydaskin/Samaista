@@ -1,6 +1,6 @@
 export const data = {
-    recipeNumber: "Receptūros nr.",
-    nameOfCard: "Pavadinimas",
+    recipeNumber: "",
+    nameOfCard: "",
     description: "",
     data: [
         {

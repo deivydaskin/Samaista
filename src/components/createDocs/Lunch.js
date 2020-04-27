@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../css/createMenu.css';
 import Button from '@material-ui/core/Button';
 import { withRouter } from 'react-router-dom';
@@ -14,6 +14,13 @@ import SearchIcon from '@material-ui/icons/Search';
 import { useStyles } from '../../css/inline-style/createMenuStyle.js';
 import { styles } from '../../css/inline-style/createMenuStyle.js';
 import { Container } from '@material-ui/core';
+import { useAuth0 } from "../../react-auth0-spa";
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
     return (
@@ -38,6 +45,11 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
 
 function Lunch(props) {
     const classes = useStyles();
+    const { getTokenSilently } = useAuth0();
+
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarText, setSnackbarText] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
     const handleChange = i => e => {
         let newArr = { ...props.lunchState };
@@ -55,11 +67,23 @@ function Lunch(props) {
 
     }
 
-    function getTechCard(arg, i, type) {
+    function handleSnackbar(action) {
+        if (action === "open") {
+            setSnackbarState(true);
+        } else if (action === "close") {
+            setSnackbarState(false);
+        }
+    }
+
+    async function getTechCard(arg, i, type) {
+        const token = await getTokenSilently();
         if (type === "name") {
             axios({
                 url: 'http://localhost:3000/graphql',
                 method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
                 data: {
                     query: `
                 query{
@@ -77,22 +101,41 @@ function Lunch(props) {
                 }
             })
                 .then((response) => {
-                    let newArr = { ...props.lunchState };
-                    newArr.lunchData[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
-                    newArr.lunchData[i].b = response.data.data.TechCardByName.overallB;
-                    newArr.lunchData[i].r = response.data.data.TechCardByName.overallR;
-                    newArr.lunchData[i].a = response.data.data.TechCardByName.overallA;
-                    newArr.lunchData[i].kcal = response.data.data.TechCardByName.overallKcal;
-                    newArr.lunchData[i].yield = response.data.data.TechCardByName.yield;
-                    props.setLunchState(newArr);
+                    if (response.statusText === "OK" && !response.data.errors && response.data.data.TechCardByName != null) {
+                        let newArr = { ...props.lunchState };
+                        newArr.lunchData[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
+                        newArr.lunchData[i].b = response.data.data.TechCardByName.overallB;
+                        newArr.lunchData[i].r = response.data.data.TechCardByName.overallR;
+                        newArr.lunchData[i].a = response.data.data.TechCardByName.overallA;
+                        newArr.lunchData[i].kcal = response.data.data.TechCardByName.overallKcal;
+                        newArr.lunchData[i].yield = response.data.data.TechCardByName.yield;
+                        props.setLunchState(newArr);
+                    } else {
+                        setSnackbarText("Tokios techn. kortelės nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                 })
+                .then(() => countOverall())
                 .catch((error) => {
+                    if (error == "TypeError: Cannot read property 'toFixed' of null") {
+                        setSnackbarText("Tokios techn. kortelės nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    } else {
+                        setSnackbarText("Įvyko klaida!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                     console.log(error);
                 });
         } else if (type === "recipeNumber") {
             axios({
                 url: 'http://localhost:3000/graphql',
                 method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
                 data: {
                     query: `
                     query{
@@ -110,17 +153,33 @@ function Lunch(props) {
                 }
             })
                 .then((response) => {
-                    let newArr = { ...props.lunchState };
-                    newArr.lunchData[i].name = response.data.data.TechCardByRecipeNumber.nameOfCard;
-                    newArr.lunchData[i].recipeNumber = response.data.data.TechCardByRecipeNumber.recipeNumber;
-                    newArr.lunchData[i].b = response.data.data.TechCardByRecipeNumber.overallB;
-                    newArr.lunchData[i].r = response.data.data.TechCardByRecipeNumber.overallR;
-                    newArr.lunchData[i].a = response.data.data.TechCardByRecipeNumber.overallA;
-                    newArr.lunchData[i].kcal = response.data.data.TechCardByRecipeNumber.overallKcal;
-                    newArr.lunchData[i].yield = response.data.data.TechCardByRecipeNumber.yield;
-                    props.setLunchState(newArr);
+                    if (response.statusText === "OK" && !response.data.errors && response.data.data.TechCardByRecipeNumber != null) {
+                        let newArr = { ...props.lunchState };
+                        newArr.lunchData[i].name = response.data.data.TechCardByRecipeNumber.nameOfCard;
+                        newArr.lunchData[i].recipeNumber = response.data.data.TechCardByRecipeNumber.recipeNumber;
+                        newArr.lunchData[i].b = response.data.data.TechCardByRecipeNumber.overallB;
+                        newArr.lunchData[i].r = response.data.data.TechCardByRecipeNumber.overallR;
+                        newArr.lunchData[i].a = response.data.data.TechCardByRecipeNumber.overallA;
+                        newArr.lunchData[i].kcal = response.data.data.TechCardByRecipeNumber.overallKcal;
+                        newArr.lunchData[i].yield = response.data.data.TechCardByRecipeNumber.yield;
+                        props.setLunchState(newArr);
+                    } else {
+                        setSnackbarText("Tokios techn. kortelės nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                 })
+                .then(() => countOverall())
                 .catch((error) => {
+                    if (error == "TypeError: Cannot read property 'toFixed' of null") {
+                        setSnackbarText("Tokios techn. kortelės nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    } else {
+                        setSnackbarText("Įvyko klaida!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                     console.log(error);
                 });
         }
@@ -134,10 +193,10 @@ function Lunch(props) {
         newArr.lunchOverallA = 0;
         newArr.lunchOverallKcal = 0;
         for (let i = 0; i < props.lunchState.lunchData.length; i++) {
-            newArr.lunchOverallB += props.lunchState.lunchData[i].b;
-            newArr.lunchOverallR += props.lunchState.lunchData[i].r;
-            newArr.lunchOverallA += props.lunchState.lunchData[i].a;
-            newArr.lunchOverallKcal += props.lunchState.lunchData[i].kcal;
+            newArr.lunchOverallB += parseFloat((props.lunchState.lunchData[i].b.toFixed(2)));
+            newArr.lunchOverallR += parseFloat((props.lunchState.lunchData[i].r.toFixed(2)));
+            newArr.lunchOverallA += parseFloat((props.lunchState.lunchData[i].a.toFixed(2)));
+            newArr.lunchOverallKcal += parseFloat((props.lunchState.lunchData[i].kcal.toFixed(2)));
         }
         props.setLunchState(newArr);
     }
@@ -261,6 +320,12 @@ function Lunch(props) {
                 <div className="Container5">
                     <Button onClick={addRow} variant="contained" color={props.btnColor} className={classes.button}>Pridėti eilutę</Button>
                 </div>
+                <Snackbar open={snackbarState} autoHideDuration={6000} onClose={() => handleSnackbar("close")}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}>
+                    <Alert onClose={() => handleSnackbar("close")} severity={snackbarSeverity}>
+                        {snackbarText}
+                    </Alert>
+                </Snackbar>
             </div>
         </div >
     );

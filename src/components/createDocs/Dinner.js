@@ -13,6 +13,14 @@ import SearchIcon from '@material-ui/icons/Search';
 import { useStyles } from '../../css/inline-style/createMenuStyle.js';
 import { styles } from '../../css/inline-style/createMenuStyle.js';
 import { Container } from '@material-ui/core';
+import { useAuth0 } from "../../react-auth0-spa";
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
 
 const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
     return (
@@ -38,6 +46,11 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
 function Dinner(props) {
 
     const classes = useStyles();
+    const { getTokenSilently } = useAuth0();
+
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarText, setSnackbarText] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
     const handleChange = i => e => {
         let newArr = { ...props.dinnerState };
@@ -52,14 +65,25 @@ function Dinner(props) {
         if (e.target.id === "b" || e.target.id === "r" || e.target.id === "a" || e.target.id === "kcal") {
             countOverall()
         }
-
     }
 
-    function getTechCard(arg, i, type) {
+    function handleSnackbar(action) {
+        if (action === "open") {
+            setSnackbarState(true);
+        } else if (action === "close") {
+            setSnackbarState(false);
+        }
+    }
+
+    async function getTechCard(arg, i, type) {
+        const token = await getTokenSilently();
         if (type === "name") {
             axios({
                 url: 'http://localhost:3000/graphql',
                 method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
                 data: {
                     query: `
                 query{
@@ -77,22 +101,41 @@ function Dinner(props) {
                 }
             })
                 .then((response) => {
-                    let newArr = { ...props.dinnerState };
-                    newArr.dinnerData[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
-                    newArr.dinnerData[i].b = response.data.data.TechCardByName.overallB;
-                    newArr.dinnerData[i].r = response.data.data.TechCardByName.overallR;
-                    newArr.dinnerData[i].a = response.data.data.TechCardByName.overallA;
-                    newArr.dinnerData[i].kcal = response.data.data.TechCardByName.overallKcal;
-                    newArr.dinnerData[i].yield = response.data.data.TechCardByName.yield;
-                    props.setDinnerState(newArr);
+                    if (response.statusText === "OK" && !response.data.errors && response.data.data.TechCardByName != null) {
+                        let newArr = { ...props.dinnerState };
+                        newArr.dinnerData[i].recipeNumber = response.data.data.TechCardByName.recipeNumber;
+                        newArr.dinnerData[i].b = response.data.data.TechCardByName.overallB;
+                        newArr.dinnerData[i].r = response.data.data.TechCardByName.overallR;
+                        newArr.dinnerData[i].a = response.data.data.TechCardByName.overallA;
+                        newArr.dinnerData[i].kcal = response.data.data.TechCardByName.overallKcal;
+                        newArr.dinnerData[i].yield = response.data.data.TechCardByName.yield;
+                        props.setDinnerState(newArr);
+                    } else {
+                        setSnackbarText("Tokios techn. kortelės nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                 })
+                .then(() => countOverall())
                 .catch((error) => {
+                    if (error == "TypeError: Cannot read property 'toFixed' of null") {
+                        setSnackbarText("Tokios techn. kortelės nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    } else {
+                        setSnackbarText("Įvyko klaida!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                     console.log(error);
                 });
         } else if (type === "recipeNumber") {
             axios({
                 url: 'http://localhost:3000/graphql',
                 method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
                 data: {
                     query: `
                     query{
@@ -110,17 +153,33 @@ function Dinner(props) {
                 }
             })
                 .then((response) => {
-                    let newArr = { ...props.dinnerState };
-                    newArr.dinnerData[i].name = response.data.data.TechCardByRecipeNumber.nameOfCard;
-                    newArr.dinnerData[i].recipeNumber = response.data.data.TechCardByRecipeNumber.recipeNumber;
-                    newArr.dinnerData[i].b = response.data.data.TechCardByRecipeNumber.overallB;
-                    newArr.dinnerData[i].r = response.data.data.TechCardByRecipeNumber.overallR;
-                    newArr.dinnerData[i].a = response.data.data.TechCardByRecipeNumber.overallA;
-                    newArr.dinnerData[i].kcal = response.data.data.TechCardByRecipeNumber.overallKcal;
-                    newArr.dinnerData[i].yield = response.data.data.TechCardByRecipeNumber.yield;
-                    props.setDinnerState(newArr);
+                    if (response.statusText === "OK" && !response.data.errors && response.data.data.TechCardByRecipeNumber != null) {
+                        let newArr = { ...props.dinnerState };
+                        newArr.dinnerData[i].name = response.data.data.TechCardByRecipeNumber.nameOfCard;
+                        newArr.dinnerData[i].recipeNumber = response.data.data.TechCardByRecipeNumber.recipeNumber;
+                        newArr.dinnerData[i].b = response.data.data.TechCardByRecipeNumber.overallB;
+                        newArr.dinnerData[i].r = response.data.data.TechCardByRecipeNumber.overallR;
+                        newArr.dinnerData[i].a = response.data.data.TechCardByRecipeNumber.overallA;
+                        newArr.dinnerData[i].kcal = response.data.data.TechCardByRecipeNumber.overallKcal;
+                        newArr.dinnerData[i].yield = response.data.data.TechCardByRecipeNumber.yield;
+                        props.setDinnerState(newArr);
+                    } else {
+                        setSnackbarText("Tokios techn. kortelės nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                 })
+                .then(() => countOverall())
                 .catch((error) => {
+                    if (error == "TypeError: Cannot read property 'toFixed' of null") {
+                        setSnackbarText("Tokios techn. kortelės nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    } else {
+                        setSnackbarText("Įvyko klaida!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                     console.log(error);
                 });
         }
@@ -134,10 +193,10 @@ function Dinner(props) {
         newArr.dinnerOverallA = 0;
         newArr.dinnerOverallKcal = 0;
         for (let i = 0; i < props.dinnerState.dinnerData.length; i++) {
-            newArr.dinnerOverallB += props.dinnerState.dinnerData[i].b;
-            newArr.dinnerOverallR += props.dinnerState.dinnerData[i].r;
-            newArr.dinnerOverallA += props.dinnerState.dinnerData[i].a;
-            newArr.dinnerOverallKcal += props.dinnerState.dinnerData[i].kcal;
+            newArr.dinnerOverallB += parseFloat((props.dinnerState.dinnerData[i].b.toFixed(2)));
+            newArr.dinnerOverallR += parseFloat((props.dinnerState.dinnerData[i].r.toFixed(2)));
+            newArr.dinnerOverallA += parseFloat((props.dinnerState.dinnerData[i].a.toFixed(2)));
+            newArr.dinnerOverallKcal += parseFloat((props.dinnerState.dinnerData[i].kcal.toFixed(2)));
         }
         props.setDinnerState(newArr);
     }
@@ -261,6 +320,12 @@ function Dinner(props) {
                 <div className="Container5">
                     <Button onClick={addRow} variant="contained" color={props.btnColor} className={classes.button}>Pridėti eilutę</Button>
                 </div>
+                <Snackbar open={snackbarState} autoHideDuration={6000} onClose={() => handleSnackbar("close")}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}>
+                    <Alert onClose={() => handleSnackbar("close")} severity={snackbarSeverity}>
+                        {snackbarText}
+                    </Alert>
+                </Snackbar>
             </div>
         </div >
     );

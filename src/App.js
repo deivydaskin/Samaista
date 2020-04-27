@@ -6,11 +6,14 @@ import CreateTechCard from './components/createDocs/CreateTechCard.js';
 import CreateMenu from './components/createDocs/CreateMenu.js';
 import CreateProduct from './components/createDocs/CreateProduct.js';
 import { ThemeProvider } from '@material-ui/styles';
-import { createMuiTheme, makeStyles } from '@material-ui/core/styles';
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { createMuiTheme } from '@material-ui/core/styles';
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import ViewProducts from './components/viewDocs/ViewProducts';
 import ViewTechCards from './components/viewDocs/ViewTechCards';
 import ViewMenu from './components/viewDocs/ViewMenu';
+import { useAuth0 } from "./react-auth0-spa";
+import history from "./utils/history";
+import PrivateRoute from "./components/PrivateRoute";
 
 const theme = createMuiTheme({
   palette: {
@@ -24,34 +27,25 @@ const theme = createMuiTheme({
 });
 
 function App() {
+  const { loading } = useAuth0();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
-        <Router>
+        <Router history={history}>
           <Switch>
-            <Route path="/viewMenu">
-              <ViewMenu />
-            </Route>
-            <Route path="/viewTechCards">
-              <ViewTechCards />
-            </Route>
-            <Route path="/viewProducts">
-              <ViewProducts />
-            </Route>
-            <Route path="/createProduct">
-              <CreateProduct />
-            </Route>
-            <Route path="/createTechCard">
-              <CreateTechCard />
-            </Route>
-            <Route path="/createMenu">
-              <CreateMenu />
-            </Route>
-            <Route path="/menu">
-              <Menu />
-            </Route>
+            <PrivateRoute path="/viewMenu" component={ViewMenu} />
+            <PrivateRoute path="/viewTechCards" component={ViewTechCards} />
+            <PrivateRoute path="/viewProducts" component={ViewProducts} />
+            <PrivateRoute path="/createProduct" component={CreateProduct} />
+            <PrivateRoute path="/createTechCard" component={CreateTechCard} />
+            <PrivateRoute path="/createMenu" component={CreateMenu} />
+            <PrivateRoute path="/menu" component={Menu} />
             <Route path="/">
-              <Login />
+              <Menu />
             </Route>
           </Switch>
         </Router>

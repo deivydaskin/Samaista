@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import { makeStyles, withStyles, fade } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { withRouter } from 'react-router-dom';
+import { useAuth0 } from "../react-auth0-spa";
 
 const useStyles = makeStyles(theme => ({
     button: {
@@ -49,10 +50,12 @@ function RedditTextField(props) {
 function Login(props) {
 
     const classes = useStyles();
+    const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
 
     function handleSubmit(e) {
         e.preventDefault();
-        props.history.push('/menu')
+        //props.history.push('/menu')
+        loginWithRedirect({})
     }
 
     return (

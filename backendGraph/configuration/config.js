@@ -1,5 +1,4 @@
 module.exports = {
-  // mongoURI: "mongodb://localhost:27017/flappyBird"
   mongoURI:
-    'mongodb+srv://deivydaskin:samaista@samaistacluster-lfgni.mongodb.net/test?retryWrites=true&w=majority',
+    'mongodb+srv://samaista-user:EABqayfXg87utR5P@samaista-uv3xg.mongodb.net/samaista?retryWrites=true&w=majority',
 };

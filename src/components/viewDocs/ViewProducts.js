@@ -25,6 +25,19 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import { styles } from '../../css/inline-style/createMenuStyle.js';
+import { useAuth0 } from "../../react-auth0-spa";
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
     return (
@@ -51,9 +64,16 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
 function ViewProducts(props) {
 
     const classes = useStyles();
+    const { getTokenSilently } = useAuth0();
 
     const [productName, setProductName] = useState([]);
     const [edit, setEdit] = useState(false);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarText, setSnackbarText] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+    const [deleteConfirmation, setDeleteConfirmation] = useState({ code: "", row: "" });
+    const [deleteProgress, setDeleteProgress] = useState(false);
+    const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [productToEdit, setProductToEdit] = useState({
         code: null,
         nameOfProduct: "",
@@ -70,10 +90,14 @@ function ViewProducts(props) {
         getAllProducts()
     }, []);
 
-    function getAllProducts() {
+    async function getAllProducts() {
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
             query{
@@ -86,18 +110,24 @@ function ViewProducts(props) {
             }
         })
             .then((response) => {
-                console.log(response);
                 setProductName(response.data.data.Products);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
 
-    function getProduct(code) {
+    async function getProduct(code) {
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
             query{
@@ -117,11 +147,13 @@ function ViewProducts(props) {
             }
         })
             .then((response) => {
-                console.log(response);
                 setProductToEdit(response.data.data.ProductByCode);
                 setEdit(true);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
@@ -160,31 +192,61 @@ function ViewProducts(props) {
 
     }
 
+    function handleSnackbar(action) {
+        if (action === "open") {
+            setSnackbarState(true);
+        } else if (action === "close") {
+            setSnackbarState(false);
+        }
+    }
+
+    async function deleteProduct(code) {
+        const token = await getTokenSilently();
+        axios({
+            url: 'http://localhost:3000/graphql',
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data: {
+                query: `
+                mutation{
+                    deleteProduct (code: ${code}){
+                      code
+                    }
+                  }
+                `
+            }
+        })
+            .then((response) => {
+                if (response.statusText === "OK" && !response.data.errors) {
+                    setSnackbarText("Produktas ištrintas sėkmingai!");
+                    setSnackbarSeverity("success");
+                    handleSnackbar("open");
+                } else {
+                    setSnackbarText("Ištrinti nepavyko!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                }
+                getAllProducts();
+                setDeleteConfirmation({ code: "", row: "" });
+                setOpenDeleteModal(false);
+                setDeleteProgress(false);
+            })
+            .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
+                console.log(error);
+            });
+    }
+
     function handleClick(code, i, type) {
         if (type === "edit") {
             getProduct(code);
         }
         else if (type === "delete") {
-            axios({
-                url: 'http://localhost:3000/graphql',
-                method: 'POST',
-                data: {
-                    query: `
-                    mutation{
-                        deleteProduct (code: ${code}){
-                          code
-                        }
-                      }
-                    `
-                }
-            })
-                .then((response) => {
-                    alert(response.statusText);
-                    getAllProducts()
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            deleteProduct(code);
         }
     }
 
@@ -202,10 +264,14 @@ function ViewProducts(props) {
         });
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
                 mutation{
@@ -225,11 +291,21 @@ function ViewProducts(props) {
             }
         })
             .then((response) => {
-                console.log(response);
-                alert(response.statusText);
+                if (response.statusText === "OK" && !response.data.errors) {
+                    setSnackbarText("Produktas atnaujintas sėkmingai!");
+                    setSnackbarSeverity("success");
+                    handleSnackbar("open");
+                } else {
+                    setSnackbarText("Atnaujinti nepavyko!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                }
                 setEdit(false);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
@@ -377,10 +453,12 @@ function ViewProducts(props) {
                                                     <em>Nėra</em>
                                                 </MenuItem>
                                                 <MenuItem value="Kiauliena, kiaulienos subproduktai ir gaminiai">Kiauliena, kiaulienos subproduktai ir gaminiai</MenuItem>
-                                                <MenuItem value="Jautiena, jaulienos subproduktai ir gaminiai">Jautiena, jaulienos subproduktai ir gaminiai</MenuItem>
+                                                <MenuItem value="Jautiena, jautienos subproduktai ir gaminiai">Jautiena, jautienos subproduktai ir gaminiai</MenuItem>
+                                                <MenuItem value="Veršiena, veršienos subproduktai ir gaminiai">Veršiena, veršienos subproduktai ir gaminiai</MenuItem>
                                                 <MenuItem value="Vištiena, vištienos subproduktai ir gaminiai">Vištiena, vištienos subproduktai ir gaminiai</MenuItem>
                                                 <MenuItem value="Kalakutiena, kalakutienos subproduktai ir gaminiai">Kalakutiena, kalakutienos subproduktai ir gaminiai</MenuItem>
                                                 <MenuItem value="Triušiena ">Triušiena</MenuItem>
+                                                <MenuItem value="Aviena, avienos subproduktai ir gaminiai">Aviena, avienos subproduktai ir gaminiai</MenuItem>
                                                 <MenuItem value="Žuvis ir jūros gėrybės">Žuvis ir jūros gėrybės</MenuItem>
                                                 <MenuItem value="Pienas ir jo gaminiai">Pienas ir jo gaminiai</MenuItem>
                                                 <MenuItem value="Kiaušiniai">Kiaušiniai</MenuItem>
@@ -394,6 +472,7 @@ function ViewProducts(props) {
                                                 <MenuItem value="Riešutai">Riešutai</MenuItem>
                                                 <MenuItem value="Sėklos">Sėklos</MenuItem>
                                                 <MenuItem value="Miltiniai gaminiai">Miltiniai gaminiai</MenuItem>
+                                                <MenuItem value="Vanduo">Vanduo</MenuItem>
                                             </Select>
                                         </FormControl>
                                     </TableCell>
@@ -409,28 +488,68 @@ function ViewProducts(props) {
                 :
                 <Grid className="product">
                     <h3 style={{ color: "#FFFFFF" }}>Produktai</h3>
-                    <div className={classes.demo} >
-                        <List classes={{ root: classes.root }}>
-                            {productName.map((row, i) => (
-                                < ListItem divider>
-                                    <ListItemText
-                                        primary={row.nameOfProduct}
-                                    />
-                                    <ListItemSecondaryAction>
-                                        <IconButton edge="end" aria-label="edit" onClick={() => handleClick(row.code, i, "edit")} >
-                                            <EditIcon style={{ color: '#FFFFFF' }} />
-                                        </IconButton>
-                                        <IconButton edge="end" aria-label="pdf">
-                                            <PictureAsPdfIcon style={{ color: '#FFFFFF' }} />
-                                        </IconButton>
-                                        <IconButton edge="end" aria-label="delete">
-                                            <DeleteIcon style={{ color: '#FFFFFF' }} onClick={() => handleClick(row.code, i, "delete")} />
-                                        </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </div>
+                    {productName.length ?
+                        <div className={classes.demo} >
+
+                            <List classes={{ root: classes.root }}>
+                                {productName.map((row, i) => (
+                                    <ListItem divider >
+                                        <ListItemText
+                                            primary={row.nameOfProduct}
+                                            secondary={row.code}
+                                        />
+
+                                        <ListItemSecondaryAction>
+                                            <IconButton edge="end" aria-label="edit" onClick={() => handleClick(row.code, i, "edit")} >
+                                                <EditIcon style={{ color: '#FFFFFF' }} />
+                                            </IconButton>
+                                            <IconButton edge="end" aria-label="pdf">
+                                                <PictureAsPdfIcon style={{ color: '#FFFFFF' }} />
+                                            </IconButton>
+                                            <IconButton edge="end" aria-label="delete">
+                                                <DeleteIcon style={{ color: '#FFFFFF' }} onClick={() => { setDeleteConfirmation({ code: row.code, row: row.i }); setOpenDeleteModal(true) }} />
+                                            </IconButton>
+                                        </ListItemSecondaryAction>
+
+                                    </ListItem>
+                                ))}
+                            </List>
+
+
+                        </div>
+                        :
+                        <CircularProgress color="primary" size={68} disableShrink style={{ marginLeft: "30px" }} thickness={5} />
+                    }
+                    <Snackbar open={snackbarState} autoHideDuration={6000} onClose={() => handleSnackbar("close")}
+                        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}>
+                        <Alert onClose={() => handleSnackbar("close")} severity={snackbarSeverity}>
+                            {snackbarText}
+                        </Alert>
+                    </Snackbar>
+                    <Dialog
+                        open={openDeleteModal}
+                        onClose={() => setOpenDeleteModal(false)}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                    >
+                        <DialogTitle id="alert-dialog-title">{"Ar tikrai norite ištrinti šį produktą?"}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+                                Ar tikrai norite ištrinti šį produktą?
+                            </DialogContentText>
+                            {deleteProgress ?
+                                <CircularProgress color="primary" size={68} disableShrink style={{ marginLeft: "30px" }} thickness={5} />
+                                : null}
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setOpenDeleteModal(false)} color="primary" autoFocus>
+                                Ne
+                            </Button>
+                            <Button onClick={() => { handleClick(deleteConfirmation.code, deleteConfirmation.row, "delete"); setDeleteProgress(true) }} color="primary" >
+                                Taip
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                 </Grid>
             }
         </div >

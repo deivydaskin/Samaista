@@ -16,13 +16,33 @@ import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
 import Breakfast from '../createDocs/Breakfast.js';
 import Lunch from '../createDocs/Lunch.js';
 import Dinner from '../createDocs/Dinner.js';
+import { useAuth0 } from "../../react-auth0-spa";
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 function ViewMenus(props) {
 
     const classes = useStyles();
 
+    const { getTokenSilently } = useAuth0();
+
     const [menuName, setMenuName] = useState([]);
     const [edit, setEdit] = useState(false);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarText, setSnackbarText] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+    const [deleteConfirmation, setDeleteConfirmation] = useState({ code: "", row: "" });
+    const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [breakfastToEditState, setBreakfastToEditState] = useState({
         nameOfMenu: "Pavadinimas",
         breakfastData: [
@@ -77,10 +97,22 @@ function ViewMenus(props) {
         getAllMenus()
     }, []);
 
-    function getAllMenus() {
+    function handleSnackbar(action) {
+        if (action === "open") {
+            setSnackbarState(true);
+        } else if (action === "close") {
+            setSnackbarState(false);
+        }
+    }
+
+    async function getAllMenus() {
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
             query{
@@ -96,14 +128,21 @@ function ViewMenus(props) {
                 setMenuName(response.data.data.Menus);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
 
-    function getMenu(nameOfMenu) {
+    async function getMenu(nameOfMenu) {
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
             query{
@@ -250,6 +289,49 @@ function ViewMenus(props) {
                 setEdit(true);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
+                console.log(error);
+            });
+    }
+
+    async function deleteMenu(nameOfMenu) {
+        const token = await getTokenSilently();
+        axios({
+            url: 'http://localhost:3000/graphql',
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data: {
+                query: `
+                mutation{
+                    deleteMenu (nameOfMenu: "${nameOfMenu}"){
+                      nameOfMenu
+                    }
+                  }
+                `
+            }
+        })
+            .then((response) => {
+                if (response.statusText === "OK" && !response.data.errors) {
+                    setSnackbarText("Valgiaraštis ištrintas sėkmingai!");
+                    setSnackbarSeverity("success");
+                    handleSnackbar("open");
+                } else {
+                    setSnackbarText("Ištrinti nepavyko!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                }
+                getAllMenus();
+                setDeleteConfirmation({ code: "", row: "" });
+                setOpenDeleteModal(false);
+            })
+            .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
@@ -259,26 +341,7 @@ function ViewMenus(props) {
             getMenu(nameOfMenu);
         }
         else if (type === "delete") {
-            axios({
-                url: 'http://localhost:3000/graphql',
-                method: 'POST',
-                data: {
-                    query: `
-                    mutation{
-                        deleteMenu (nameOfMenu: "${nameOfMenu}"){
-                          nameOfMenu
-                        }
-                      }
-                    `
-                }
-            })
-                .then((response) => {
-                    alert(response.statusText);
-                    getAllMenus()
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            deleteMenu(nameOfMenu);
         }
     }
 
@@ -334,17 +397,20 @@ function ViewMenus(props) {
         });
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
         let breakfastQuoted = JSON.stringify(breakfastToEditState.breakfastData);
         const breakfastUnquoted = breakfastQuoted.replace(/"([^"]+)":/g, '$1:');
         let lunchQuoted = JSON.stringify(lunchToEditState.lunchData);
         const lunchUnquoted = lunchQuoted.replace(/"([^"]+)":/g, '$1:');
         let dinnerQuoted = JSON.stringify(dinnerToEditState.dinnerData);
         const dinnerUnquoted = dinnerQuoted.replace(/"([^"]+)":/g, '$1:');
-        console.log(breakfastToEditState);
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
                 mutation {
@@ -375,10 +441,21 @@ function ViewMenus(props) {
             }
         })
             .then((response) => {
-                console.log(response);
-                alert(response.statusText);
+                if (response.statusText === "OK" && !response.data.errors) {
+                    setSnackbarText("Valgiaraštis atnaujintas sėkmingai!");
+                    setSnackbarSeverity("success");
+                    handleSnackbar("open");
+                } else {
+                    setSnackbarText("Atnaujinti nepavyko!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                }
+                setEdit(false);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
@@ -408,28 +485,59 @@ function ViewMenus(props) {
                 :
                 <Grid className="product">
                     <h3 style={{ color: "#FFFFFF" }}>Meniu</h3>
-                    <div className={classes.demo} >
-                        <List classes={{ root: classes.root }}>
-                            {menuName.map((row, i) => (
-                                < ListItem divider>
-                                    <ListItemText
-                                        primary={row.nameOfMenu}
-                                    />
-                                    <ListItemSecondaryAction>
-                                        <IconButton edge="end" aria-label="edit" onClick={() => handleClick(row.nameOfMenu, i, "edit")} >
-                                            <EditIcon style={{ color: '#FFFFFF' }} />
-                                        </IconButton>
-                                        <IconButton edge="end" aria-label="pdf">
-                                            <PictureAsPdfIcon style={{ color: '#FFFFFF' }} />
-                                        </IconButton>
-                                        <IconButton edge="end" aria-label="delete">
-                                            <DeleteIcon style={{ color: '#FFFFFF' }} onClick={() => handleClick(row.nameOfMenu, i, "delete")} />
-                                        </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </div>
+                    {menuName.length ?
+                        <div className={classes.demo} >
+                            <List classes={{ root: classes.root }}>
+                                {menuName.map((row, i) => (
+                                    < ListItem divider>
+                                        <ListItemText
+                                            primary={row.nameOfMenu}
+                                        />
+                                        <ListItemSecondaryAction>
+                                            <IconButton edge="end" aria-label="edit" onClick={() => handleClick(row.nameOfMenu, i, "edit")} >
+                                                <EditIcon style={{ color: '#FFFFFF' }} />
+                                            </IconButton>
+                                            <IconButton edge="end" aria-label="pdf">
+                                                <PictureAsPdfIcon style={{ color: '#FFFFFF' }} />
+                                            </IconButton>
+                                            <IconButton edge="end" aria-label="delete">
+                                                <DeleteIcon style={{ color: '#FFFFFF' }} onClick={() => { setDeleteConfirmation({ code: row.nameOfMenu, row: i }); setOpenDeleteModal(true) }} />
+                                            </IconButton>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </div>
+                        :
+                        <CircularProgress color="primary" size={68} disableShrink style={{ marginLeft: "10px" }} thickness={5} />
+                    }
+                    <Snackbar open={snackbarState} autoHideDuration={6000} onClose={() => handleSnackbar("close")}
+                        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}>
+                        <Alert onClose={() => handleSnackbar("close")} severity={snackbarSeverity}>
+                            {snackbarText}
+                        </Alert>
+                    </Snackbar>
+                    <Dialog
+                        open={openDeleteModal}
+                        onClose={() => setOpenDeleteModal(false)}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                    >
+                        <DialogTitle id="alert-dialog-title">{"Ar tikrai norite ištrinti šį valgiaraštį?"}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+                                {deleteConfirmation.code}
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setOpenDeleteModal(false)} color="primary" autoFocus>
+                                Ne
+                            </Button>
+                            <Button onClick={() => { handleClick(deleteConfirmation.code, deleteConfirmation.row, "delete") }} color="primary" >
+                                Taip
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                 </Grid>
             }
         </div >

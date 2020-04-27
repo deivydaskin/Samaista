@@ -20,14 +20,24 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TextFieldMui from '@material-ui/core/TextField';
 import { Container } from '@material-ui/core';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 import InputBase from '@material-ui/core/InputBase';
 import { InputLabel } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { styles } from '../../css/inline-style/createMenuStyle.js';
 import SearchIcon from '@material-ui/icons/Search';
+import { useAuth0 } from "../../react-auth0-spa";
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
+function Alert(props) {
+    return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
     return (
@@ -54,9 +64,15 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
 function ViewTechCards(props) {
 
     const classes = useStyles();
+    const { getTokenSilently } = useAuth0();
 
     const [techCardName, setTechCardName] = useState([]);
     const [edit, setEdit] = useState(false);
+    const [snackbarState, setSnackbarState] = useState(false);
+    const [snackbarText, setSnackbarText] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+    const [deleteConfirmation, setDeleteConfirmation] = useState({ code: "", row: "" });
+    const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [techCardToEdit, setTechCardToEdit] = useState({
         recipeNumber: "",
         nameOfCard: "",
@@ -85,10 +101,22 @@ function ViewTechCards(props) {
         getAllTechCards()
     }, []);
 
-    function getAllTechCards() {
+    function handleSnackbar(action) {
+        if (action === "open") {
+            setSnackbarState(true);
+        } else if (action === "close") {
+            setSnackbarState(false);
+        }
+    }
+
+    async function getAllTechCards() {
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
             query{
@@ -101,18 +129,24 @@ function ViewTechCards(props) {
             }
         })
             .then((response) => {
-                console.log(response);
                 setTechCardName(response.data.data.TechCards);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
 
-    function getTechCard(recipeNumber) {
+    async function getTechCard(recipeNumber) {
+        const token = await getTokenSilently();
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
             query{
@@ -147,6 +181,9 @@ function ViewTechCards(props) {
                 setEdit(true);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
@@ -196,11 +233,51 @@ function ViewTechCards(props) {
             overallKcal += techCardToEdit.data[i].kcal;
         }
         let newArr = { ...techCardToEdit };
-        newArr.overallB = overallB;
+        newArr.overallB = overallB.toFixed(2);
         newArr.overallR = overallR;
         newArr.overallA = overallA;
         newArr.overallKcal = overallKcal;
         setTechCardToEdit(newArr);
+    }
+
+    async function deleteTechCard(recipeNumber) {
+        const token = await getTokenSilently();
+        axios({
+            url: 'http://localhost:3000/graphql',
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data: {
+                query: `
+                mutation{
+                    deleteTechCard (recipeNumber: "${recipeNumber}"){
+                      recipeNumber
+                    }
+                  }
+                `
+            }
+        })
+            .then((response) => {
+                if (response.statusText === "OK" && !response.data.errors) {
+                    setSnackbarText("Techn. kortelė ištrinta sėkmingai!");
+                    setSnackbarSeverity("success");
+                    handleSnackbar("open");
+                } else {
+                    setSnackbarText("Ištrinti nepavyko!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                }
+                getAllTechCards();
+                setDeleteConfirmation({ code: "", row: "" });
+                setOpenDeleteModal(false);
+            })
+            .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
+                console.log(error);
+            });
     }
 
     function handleClick(recipeNumber, i, type) {
@@ -208,26 +285,7 @@ function ViewTechCards(props) {
             getTechCard(recipeNumber);
         }
         else if (type === "delete") {
-            axios({
-                url: 'http://localhost:3000/graphql',
-                method: 'POST',
-                data: {
-                    query: `
-                    mutation{
-                        deleteTechCard (recipeNumber: "${recipeNumber}"){
-                          recipeNumber
-                        }
-                      }
-                    `
-                }
-            })
-                .then((response) => {
-                    alert(response.statusText);
-                    getAllTechCards()
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            deleteTechCard(recipeNumber);
         }
     }
 
@@ -257,12 +315,16 @@ function ViewTechCards(props) {
         });
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
+        const token = await getTokenSilently();
         let payload = JSON.stringify(techCardToEdit.data);
         const unquoted = payload.replace(/"([^"]+)":/g, '$1:');
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
                 mutation {
@@ -295,11 +357,21 @@ function ViewTechCards(props) {
             }
         })
             .then((response) => {
-                console.log(response);
-                alert(response.statusText);
+                if (response.statusText === "OK" && !response.data.errors) {
+                    setSnackbarText("Techn. kortelė atnaujinta sėkmingai!");
+                    setSnackbarSeverity("success");
+                    handleSnackbar("open");
+                } else {
+                    setSnackbarText("Atnaujinti nepavyko!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                }
                 setEdit(false);
             })
             .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
                 console.log(error);
             });
     }
@@ -320,11 +392,15 @@ function ViewTechCards(props) {
         setTechCardToEdit(newArr);
     }
 
-    function getProduct(arg, i, type) {
+    async function getProduct(arg, i, type) {
+        const token = await getTokenSilently();
         if (type === "code") {
             axios({
                 url: 'http://localhost:3000/graphql',
                 method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
                 data: {
                     query: `
                 query{
@@ -342,18 +418,26 @@ function ViewTechCards(props) {
                 }
             })
                 .then((response) => {
-                    console.log(response.data.data);
-                    let newArr = { ...techCardToEdit };
-                    newArr.data[i].name = response.data.data.ProductByCode.nameOfProduct;
-                    newArr.data[i].bruto = response.data.data.ProductByCode.bruto;
-                    newArr.data[i].neto = response.data.data.ProductByCode.neto;
-                    newArr.data[i].b = response.data.data.ProductByCode.b;
-                    newArr.data[i].r = response.data.data.ProductByCode.r;
-                    newArr.data[i].a = response.data.data.ProductByCode.a;
-                    newArr.data[i].kcal = response.data.data.ProductByCode.kcal;
-                    setTechCardToEdit(newArr);
+                    if (response.statusText === "OK" && !response.data.errors && response.data.data.ProductByCode != null) {
+                        let newArr = { ...techCardToEdit };
+                        newArr.data[i].name = response.data.data.ProductByCode.nameOfProduct;
+                        newArr.data[i].bruto = response.data.data.ProductByCode.bruto;
+                        newArr.data[i].neto = response.data.data.ProductByCode.neto;
+                        newArr.data[i].b = response.data.data.ProductByCode.b;
+                        newArr.data[i].r = response.data.data.ProductByCode.r;
+                        newArr.data[i].a = response.data.data.ProductByCode.a;
+                        newArr.data[i].kcal = response.data.data.ProductByCode.kcal;
+                        setTechCardToEdit(newArr);
+                    } else {
+                        setSnackbarText("Tokio produkto nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                 })
                 .catch((error) => {
+                    setSnackbarText("Įvyko klaida!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
                     console.log(error);
                 });
         } else if (type === "name") {
@@ -377,18 +461,26 @@ function ViewTechCards(props) {
                 }
             })
                 .then((response) => {
-                    console.log(response.data.data.Product);
-                    let newArr = { ...techCardToEdit };
-                    newArr.data[i].name = response.data.data.ProductByName.nameOfProduct;
-                    newArr.data[i].bruto = response.data.data.ProductByName.bruto;
-                    newArr.data[i].neto = response.data.data.ProductByName.neto;
-                    newArr.data[i].b = response.data.data.ProductByName.b;
-                    newArr.data[i].r = response.data.data.ProductByName.r;
-                    newArr.data[i].a = response.data.data.ProductByName.a;
-                    newArr.data[i].kcal = response.data.data.ProductByName.kcal;
-                    setTechCardToEdit(newArr);
+                    if (response.statusText === "OK" && !response.data.errors && response.data.data.ProductByName != null) {
+                        let newArr = { ...techCardToEdit };
+                        newArr.data[i].name = response.data.data.ProductByName.nameOfProduct;
+                        newArr.data[i].bruto = response.data.data.ProductByName.bruto;
+                        newArr.data[i].neto = response.data.data.ProductByName.neto;
+                        newArr.data[i].b = response.data.data.ProductByName.b;
+                        newArr.data[i].r = response.data.data.ProductByName.r;
+                        newArr.data[i].a = response.data.data.ProductByName.a;
+                        newArr.data[i].kcal = response.data.data.ProductByName.kcal;
+                        setTechCardToEdit(newArr);
+                    } else {
+                        setSnackbarText("Tokio produkto nėra!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
                 })
                 .catch((error) => {
+                    setSnackbarText("Įvyko klaida!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
                     console.log(error);
                 });
         }
@@ -587,28 +679,59 @@ function ViewTechCards(props) {
                 :
                 <Grid className="product">
                     <h3 style={{ color: "#FFFFFF" }}>Technologinės kortelės</h3>
-                    <div className={classes.demo} >
-                        <List classes={{ root: classes.root }}>
-                            {techCardName.map((row, i) => (
-                                < ListItem divider>
-                                    <ListItemText
-                                        primary={row.nameOfCard}
-                                    />
-                                    <ListItemSecondaryAction>
-                                        <IconButton edge="end" aria-label="edit" onClick={() => handleClick(row.recipeNumber, i, "edit")} >
-                                            <EditIcon style={{ color: '#FFFFFF' }} />
-                                        </IconButton>
-                                        <IconButton edge="end" aria-label="pdf">
-                                            <PictureAsPdfIcon style={{ color: '#FFFFFF' }} />
-                                        </IconButton>
-                                        <IconButton edge="end" aria-label="delete">
-                                            <DeleteIcon style={{ color: '#FFFFFF' }} onClick={() => handleClick(row.recipeNumber, i, "delete")} />
-                                        </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </div>
+                    {techCardName.length ?
+                        <div className={classes.demo} >
+                            <List classes={{ root: classes.root }}>
+                                {techCardName.map((row, i) => (
+                                    < ListItem divider>
+                                        <ListItemText
+                                            primary={row.nameOfCard}
+                                        />
+                                        <ListItemSecondaryAction>
+                                            <IconButton edge="end" aria-label="edit" onClick={() => handleClick(row.recipeNumber, i, "edit")} >
+                                                <EditIcon style={{ color: '#FFFFFF' }} />
+                                            </IconButton>
+                                            <IconButton edge="end" aria-label="pdf">
+                                                <PictureAsPdfIcon style={{ color: '#FFFFFF' }} />
+                                            </IconButton>
+                                            <IconButton edge="end" aria-label="delete">
+                                                <DeleteIcon style={{ color: '#FFFFFF' }} onClick={() => { setDeleteConfirmation({ code: row.recipeNumber, row: i, name: row.nameOfCard }); setOpenDeleteModal(true) }} />
+                                            </IconButton>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </div>
+                        :
+                        <CircularProgress color="primary" size={68} disableShrink style={{ marginLeft: "100px" }} thickness={5} />
+                    }
+                    <Snackbar open={snackbarState} autoHideDuration={6000} onClose={() => handleSnackbar("close")}
+                        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}>
+                        <Alert onClose={() => handleSnackbar("close")} severity={snackbarSeverity}>
+                            {snackbarText}
+                        </Alert>
+                    </Snackbar>
+                    <Dialog
+                        open={openDeleteModal}
+                        onClose={() => setOpenDeleteModal(false)}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                    >
+                        <DialogTitle id="alert-dialog-title">{"Ar tikrai norite ištrinti šią techn. kortelę?"}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+                                {deleteConfirmation.name}
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setOpenDeleteModal(false)} color="primary" autoFocus>
+                                Ne
+                            </Button>
+                            <Button onClick={() => { handleClick(deleteConfirmation.code, deleteConfirmation.row, "delete") }} color="primary" >
+                                Taip
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                 </Grid>
             }
         </div >

@@ -1,15 +1,26 @@
-const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const express = require('express');
 const expressGraphQL = require('express-graphql');
-const techCards = require('./routes/api/techCards.js');
-const menus = require('./routes/api/menus.js');
-var nodemailer = require('nodemailer');
 const schema = require('./schema.js');
-
-
 const app = express();
+var jwt = require('express-jwt');
+var jwks = require('jwks-rsa');
+const cors = require("cors");
+
+app.use(cors({ origin: 'http://localhost:3000' }));
+
+var jwtCheck = jwt({
+  secret: jwks.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
+    jwksUri: 'https://dev-fj-8t2wi.eu.auth0.com/.well-known/jwks.json'
+  }),
+  audience: 'http://localhost:3001',
+  issuer: 'https://dev-fj-8t2wi.eu.auth0.com/',
+  algorithms: ['RS256']
+});
 
 // bodyParser Middleware
 app.use(bodyParser.json());
@@ -23,58 +34,10 @@ mongoose
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
-app.use('/graphql', expressGraphQL({
+app.use('/graphql', jwtCheck, expressGraphQL({
   schema: schema,
   graphiql: true
 }))
-
-// Use Routes
-// app.use('/api/techCards', techCards);
-// app.use('/api/menu', menus);
-// app.post('/api/sendEmail', (req, res, next) => {
-//   const transporter = nodemailer.createTransport({
-//     host: 'smtp.ethereal.email',
-//     port: 587,
-//     auth: {
-//       user: 'lorna.kshlerin@ethereal.email',
-//       pass: '76XxBP4say7xDMtyJk'
-//     }
-//   });
-
-//   var msg = `
-//     <p>Technologinė kortelė</p>
-//     <h3>${req.body.payload.nameOfCard}</h3>
-//     ${req.body.payload.data.map(row => (
-//     `<ul>
-//       <li>Nr: ${row.number}</li>
-//       <li>Pavadinimas: ${row.name}</li>
-//       <li>Bruto: ${row.bruto}</li>
-//       <li>Neto: ${row.neto}</li>
-//       <li>Baltymai, g: ${row.b}</li>
-//       <li>Riebalai, g: ${row.r}</li>
-//       <li>Angliavandeniai, g: ${row.a}</li>
-//       <li>Energinė vertė, kcal: ${row.kcal}</li>
-//     </ul>`
-//   ))}
-//       <h5>Aprašymas:</h5>
-//       <p>${req.body.payload.description}</p>
-//   `
-
-//   var mailOptions = {
-//     from: 'lorna.kshlerin@ethereal.email',
-//     to: 'lorna.kshlerin@ethereal.email',
-//     subject: 'Payload',
-//     html: msg
-//   };
-
-//   transporter.sendMail(mailOptions, function (error, info) {
-//     if (error) {
-//       console.log(error);
-//     } else {
-//       console.log('Email sent: ' + info.response);
-//     }
-//   });
-// })
 
 // process.env.PORT for heroku
 const isDeveloping = process.env.NODE_ENV !== 'production';
