@@ -11,7 +11,6 @@ npm start
 4. Open new console in origin folder
 5. type:
 ```
-cd backendGraph
 npm install
 npm start
 ```
