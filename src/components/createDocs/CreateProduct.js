@@ -58,12 +58,12 @@ function CreateProduct(props) {
     const [productDataState, setProductDataState] = useState({
         code: null,
         nameOfProduct: "",
-        bruto: 0,
+        bruto: null,
         neto: 100,
-        b: 0,
-        r: 0,
-        a: 0,
-        kcal: 0,
+        b: null,
+        r: null,
+        a: null,
+        kcal: null,
         category: ""
     });
 
@@ -110,14 +110,16 @@ function CreateProduct(props) {
 
     async function saveDoc() {
         const token = await getTokenSilently();
-        axios({
-            url: 'http://localhost:3000/graphql',
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            data: {
-                query: `
+        const validicity = await validation();
+        if (validicity) {
+            axios({
+                url: 'http://localhost:3000/graphql',
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                data: {
+                    query: `
                 mutation{
                     addProduct (code: ${productDataState.code}, nameOfProduct: "${productDataState.nameOfProduct}", bruto: ${productDataState.bruto}, neto: ${productDataState.neto}, b: ${productDataState.b}, r: ${productDataState.r}, a: ${productDataState.a}, kcal: ${productDataState.kcal}, category: "${productDataState.category}"){
                       code
@@ -132,26 +134,27 @@ function CreateProduct(props) {
                     }
                   }
                 `
-            }
-        })
-            .then((response) => {
-                if (response.statusText === "OK" && !response.data.errors) {
-                    setSnackbarText("Produktas išsaugotas!");
-                    setSnackbarSeverity("success");
-                    handleSnackbar("open");
-                } else {
-                    setSnackbarText("Išsaugoti nepavyko!");
+                }
+            })
+                .then((response) => {
+                    if (response.statusText === "OK" && !response.data.errors) {
+                        setSnackbarText("Produktas išsaugotas!");
+                        setSnackbarSeverity("success");
+                        handleSnackbar("open");
+                    } else {
+                        setSnackbarText("Išsaugoti nepavyko!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
+                    getAllProducts();
+                })
+                .catch((error) => {
+                    setSnackbarText("Įvyko klaida!");
                     setSnackbarSeverity("error");
                     handleSnackbar("open");
-                }
-                getAllProducts();
-            })
-            .catch((error) => {
-                setSnackbarText("Įvyko klaida!");
-                setSnackbarSeverity("error");
-                handleSnackbar("open");
-                console.log(error);
-            });
+                    console.log(error);
+                });
+        }
     }
 
     async function getAllProducts() {
@@ -185,6 +188,58 @@ function CreateProduct(props) {
                 handleSnackbar("open");
                 console.log(error);
             });
+    }
+
+    function validation() {
+        let validationArr = { ...productDataState };
+        if (validationArr.nameOfProduct === "") {
+            setSnackbarText("Produkto pavadinimas negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.code === null) {
+            setSnackbarText("Produkto kodas negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.bruto === null) {
+            setSnackbarText("Produkto bruto negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.neto === null) {
+            setSnackbarText("Produkto neto negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.b === null) {
+            setSnackbarText("Produkto baltymai negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.r === null) {
+            setSnackbarText("Produkto riebalai negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.a === null) {
+            setSnackbarText("Produkto angliavandeniai negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.kcal === null) {
+            setSnackbarText("Produkto kcal negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.category === "") {
+            setSnackbarText("Produkto kategorija negali būti tusčia!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else {
+            return true;
+        }
     }
 
     return (

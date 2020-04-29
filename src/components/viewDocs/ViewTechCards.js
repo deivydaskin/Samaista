@@ -73,6 +73,11 @@ function ViewTechCards(props) {
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
     const [deleteConfirmation, setDeleteConfirmation] = useState({ code: "", row: "" });
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
+    const [firstBruto, setFirstBruto] = useState();
+    const [firstB, setFirstB] = useState();
+    const [firstR, setFirstR] = useState();
+    const [firstA, setFirstA] = useState();
+    const [firstKcal, setFirstKcal] = useState();
     const [techCardToEdit, setTechCardToEdit] = useState({
         recipeNumber: "",
         nameOfCard: "",
@@ -141,6 +146,7 @@ function ViewTechCards(props) {
 
     async function getTechCard(recipeNumber) {
         const token = await getTokenSilently();
+
         axios({
             url: 'http://localhost:3000/graphql',
             method: 'POST',
@@ -202,13 +208,38 @@ function ViewTechCards(props) {
         }
         else if (e.target.id === "code") {
             newArr.data[i][e.target.id] = parseInt(e.target.value);
-            console.log(newArr);
         }
         else if (e.target.id === "yield") {
             newArr.yield = e.target.value;
         }
         else if (e.target.id === "recipeNumber") {
             newArr.recipeNumber = e.target.value;
+        }
+        else if (e.target.id === "neto") {
+            newArr.data[i][e.target.id] = parseFloat(e.target.value);
+            if (firstBruto) {
+                calculations(i);
+                if (!firstBruto[i]) {
+                    getFirstsOfProduct(techCardToEdit.data[i].code, i, "code")
+                }
+            } else {
+                getFirstsOfProduct(techCardToEdit.data[i].code, i, "code")
+            }
+
+            let overallB = 0;
+            let overallR = 0;
+            let overallA = 0;
+            let overallKcal = 0;
+            for (let i = 0; i < techCardToEdit.data.length; i++) {
+                overallB += techCardToEdit.data[i].b;
+                overallR += techCardToEdit.data[i].r;
+                overallA += techCardToEdit.data[i].a;
+                overallKcal += techCardToEdit.data[i].kcal;
+            }
+            newArr.overallB = overallB.toFixed(2);
+            newArr.overallR = overallR.toFixed(2);
+            newArr.overallA = overallA.toFixed(2);
+            newArr.overallKcal = overallKcal.toFixed(2);
         }
         else {
             newArr.data[i][e.target.id] = parseFloat(e.target.value);
@@ -234,9 +265,9 @@ function ViewTechCards(props) {
         }
         let newArr = { ...techCardToEdit };
         newArr.overallB = overallB.toFixed(2);
-        newArr.overallR = overallR;
-        newArr.overallA = overallA;
-        newArr.overallKcal = overallKcal;
+        newArr.overallR = overallR.toFixed(2);
+        newArr.overallA = overallA.toFixed(2);
+        newArr.overallKcal = overallKcal.toFixed(2);
         setTechCardToEdit(newArr);
     }
 
@@ -392,6 +423,62 @@ function ViewTechCards(props) {
         setTechCardToEdit(newArr);
     }
 
+    async function getFirstsOfProduct(arg, i, type) {
+        const token = await getTokenSilently();
+        axios({
+            url: 'http://localhost:3000/graphql',
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data: {
+                query: `
+                query{
+                    ProductByCode(code: "${arg}") {
+                      nameOfProduct
+                      bruto
+                      neto
+                      b
+                      r
+                      a
+                      kcal
+                    }
+                }
+                `
+            }
+        })
+            .then((response) => {
+                if (response.statusText === "OK" && !response.data.errors && response.data.data.ProductByCode != null) {
+                    let newBruto = { ...firstBruto };
+                    let newB = { ...firstB };
+                    let newR = { ...firstR };
+                    let newA = { ...firstA };
+                    let newKcal = { ...firstKcal };
+                    newBruto[i] = response.data.data.ProductByCode.bruto;
+                    newB[i] = response.data.data.ProductByCode.b;
+                    newR[i] = response.data.data.ProductByCode.r;
+                    newA[i] = response.data.data.ProductByCode.a;
+                    newKcal[i] = response.data.data.ProductByCode.kcal;
+                    console.log(newBruto);
+                    setFirstBruto(newBruto);
+                    setFirstB(newB);
+                    setFirstR(newR);
+                    setFirstA(newA);
+                    setFirstKcal(newKcal);
+                } else {
+                    setSnackbarText("Tokio produkto nėra!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                }
+            })
+            .catch((error) => {
+                setSnackbarText("Įvyko klaida!");
+                setSnackbarSeverity("error");
+                handleSnackbar("open");
+                console.log(error);
+            });
+    }
+
     async function getProduct(arg, i, type) {
         const token = await getTokenSilently();
         if (type === "code") {
@@ -428,6 +515,22 @@ function ViewTechCards(props) {
                         newArr.data[i].a = response.data.data.ProductByCode.a;
                         newArr.data[i].kcal = response.data.data.ProductByCode.kcal;
                         setTechCardToEdit(newArr);
+                        let newBruto = { ...firstBruto };
+                        let newB = { ...firstB };
+                        let newR = { ...firstR };
+                        let newA = { ...firstA };
+                        let newKcal = { ...firstKcal };
+                        newBruto[i] = response.data.data.ProductByCode.bruto;
+                        newB[i] = response.data.data.ProductByCode.b;
+                        newR[i] = response.data.data.ProductByCode.r;
+                        newA[i] = response.data.data.ProductByCode.a;
+                        newKcal[i] = response.data.data.ProductByCode.kcal;
+                        console.log(newBruto);
+                        setFirstBruto(newBruto);
+                        setFirstB(newB);
+                        setFirstR(newR);
+                        setFirstA(newA);
+                        setFirstKcal(newKcal);
                     } else {
                         setSnackbarText("Tokio produkto nėra!");
                         setSnackbarSeverity("error");
@@ -486,6 +589,18 @@ function ViewTechCards(props) {
         }
     }
 
+    function calculations(i) {
+        let newArr = { ...techCardToEdit };
+        let newNeto = newArr.data[i].neto;
+        newArr.data[i].bruto = parseFloat(((firstBruto[i] * newNeto) / 100).toFixed(0));
+        newArr.data[i].b = parseFloat(((firstB[i] * newNeto) / 100).toFixed(2));
+        newArr.data[i].r = parseFloat(((firstR[i] * newNeto) / 100).toFixed(2));
+        newArr.data[i].a = parseFloat(((firstA[i] * newNeto) / 100).toFixed(2));
+        newArr.data[i].kcal = parseFloat(((firstKcal[i] * newNeto) / 100).toFixed(2));
+        setTechCardToEdit(newArr);
+        countOverall();
+    }
+
     return (
         <div className="viewProducts">
             <div className="backBtn">
@@ -533,6 +648,7 @@ function ViewTechCards(props) {
                                                 inputProps={{ style: { color: '#FFFFFF', width: 100 } }}
                                                 value={row.number}
                                                 onChange={handleChange(i)}
+                                                disabled
                                                 error
                                                 id="number"
                                                 style={{ width: "50px" }}
@@ -565,6 +681,7 @@ function ViewTechCards(props) {
                                                 }}
                                                 value={row.bruto}
                                                 onChange={handleChange(i)}
+                                                disabled
                                                 error
                                                 id="bruto"
                                                 style={{ width: "75px" }}
@@ -591,6 +708,7 @@ function ViewTechCards(props) {
                                                 }}
                                                 value={row.b}
                                                 onChange={handleChange(i)}
+                                                disabled
                                                 error
                                                 id="b"
                                                 style={{ width: "75px" }}
@@ -604,6 +722,7 @@ function ViewTechCards(props) {
                                                 }}
                                                 value={row.r}
                                                 onChange={handleChange(i)}
+                                                disabled
                                                 error
                                                 id="r"
                                                 style={{ width: "75px" }}
@@ -617,6 +736,7 @@ function ViewTechCards(props) {
                                                 }}
                                                 value={row.a}
                                                 onChange={handleChange(i)}
+                                                disabled
                                                 error
                                                 id="a"
                                                 style={{ width: "75px" }}
@@ -631,6 +751,7 @@ function ViewTechCards(props) {
                                                     }}
                                                     value={row.kcal}
                                                     onChange={handleChange(i)}
+                                                    disabled
                                                     error
                                                     id="kcal"
                                                     style={{ width: "75px" }}
@@ -686,6 +807,7 @@ function ViewTechCards(props) {
                                     < ListItem divider>
                                         <ListItemText
                                             primary={row.nameOfCard}
+                                            secondary={row.recipeNumber}
                                         />
                                         <ListItemSecondaryAction>
                                             <IconButton edge="end" aria-label="edit" onClick={() => handleClick(row.recipeNumber, i, "edit")} >

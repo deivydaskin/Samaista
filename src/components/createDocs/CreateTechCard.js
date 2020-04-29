@@ -46,11 +46,6 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
     );
 });
 
-var overallB;
-var overallR;
-var overallA;
-var overallKcal;
-
 function CreateTechCard(props) {
     useEffect(() => {
     }, [])
@@ -61,9 +56,15 @@ function CreateTechCard(props) {
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarText, setSnackbarText] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+    const [firstBruto, setFirstBruto] = useState();
+    const [firstB, setFirstB] = useState();
+    const [firstR, setFirstR] = useState();
+    const [firstA, setFirstA] = useState();
+    const [firstKcal, setFirstKcal] = useState();
 
     const handleChange = i => e => {
         let newArr = { ...dataState };
+
         if (e.target.id === "nameOfCard") {
             newArr.nameOfCard = e.target.value;
         }
@@ -83,13 +84,33 @@ function CreateTechCard(props) {
         else if (e.target.id === "recipeNumber") {
             newArr.recipeNumber = e.target.value;
         }
+        else if (e.target.id === "neto") {
+            newArr.data[i][e.target.id] = parseFloat(e.target.value);
+            if (firstBruto) {
+                calculations(i);
+            }
+            let overallB = 0;
+            let overallR = 0;
+            let overallA = 0;
+            let overallKcal = 0;
+            for (let i = 0; i < newArr.data.length; i++) {
+                overallB += dataState.data[i].b;
+                overallR += dataState.data[i].r;
+                overallA += dataState.data[i].a;
+                overallKcal += dataState.data[i].kcal;
+            }
+            newArr.overallB = overallB.toFixed(2);
+            newArr.overallR = overallR.toFixed(2);
+            newArr.overallA = overallA.toFixed(2);
+            newArr.overallKcal = overallKcal.toFixed(2);
+        }
         else {
             newArr.data[i][e.target.id] = parseFloat(e.target.value);
         }
         setDataState(newArr);
 
         if (e.target.id === "b" || e.target.id === "r" || e.target.id === "a" || e.target.id === "kcal") {
-            countOverall()
+            countOverall();
         }
     }
 
@@ -101,18 +122,18 @@ function CreateTechCard(props) {
         }
     }
 
-    function countOverall() {
-        overallB = 0;
-        overallR = 0;
-        overallA = 0;
-        overallKcal = 0;
-        for (let i = 0; i < dataState.data.length; i++) {
+    const countOverall = () => {
+        let newArr = { ...dataState };
+        let overallB = 0;
+        let overallR = 0;
+        let overallA = 0;
+        let overallKcal = 0;
+        for (let i = 0; i < newArr.data.length; i++) {
             overallB += dataState.data[i].b;
             overallR += dataState.data[i].r;
             overallA += dataState.data[i].a;
             overallKcal += dataState.data[i].kcal;
         }
-        let newArr = { ...dataState };
         newArr.overallB = overallB.toFixed(2);
         newArr.overallR = overallR.toFixed(2);
         newArr.overallA = overallA.toFixed(2);
@@ -172,6 +193,21 @@ function CreateTechCard(props) {
                         newArr.data[i].a = response.data.data.ProductByCode.a;
                         newArr.data[i].kcal = response.data.data.ProductByCode.kcal;
                         setDataState(newArr);
+                        let newBruto = { ...firstBruto };
+                        let newB = { ...firstB };
+                        let newR = { ...firstR };
+                        let newA = { ...firstA };
+                        let newKcal = { ...firstKcal };
+                        newBruto[i] = response.data.data.ProductByCode.bruto;
+                        newB[i] = response.data.data.ProductByCode.b;
+                        newR[i] = response.data.data.ProductByCode.r;
+                        newA[i] = response.data.data.ProductByCode.a;
+                        newKcal[i] = response.data.data.ProductByCode.kcal;
+                        setFirstBruto(newBruto);
+                        setFirstB(newB);
+                        setFirstR(newR);
+                        setFirstA(newA);
+                        setFirstKcal(newKcal);
                     } else {
                         setSnackbarText("Tokio produkto nėra!");
                         setSnackbarSeverity("error");
@@ -241,16 +277,17 @@ function CreateTechCard(props) {
         //GraphQL reikalauja names of fields be "" todel panaudojau regex, nes nezinau kaip kitaip isparsint.
         let payload = JSON.stringify(dataState.data);
         const unquoted = payload.replace(/"([^"]+)":/g, '$1:');
-        console.log(unquoted);
         const token = await getTokenSilently();
-        axios({
-            url: 'http://localhost:3000/graphql',
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            data: {
-                query: `
+        const validacity = await validation();
+        if (validacity) {
+            axios({
+                url: 'http://localhost:3000/graphql',
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                data: {
+                    query: `
                 mutation {
                     addTechCard (recipeNumber: "${dataState.recipeNumber}", nameOfCard: "${dataState.nameOfCard}", description: "${dataState.description}", data:${unquoted}, overallB: ${dataState.overallB}, overallR: ${dataState.overallR}, overallA: ${dataState.overallA}, overallKcal: ${dataState.overallKcal}, yield: "${dataState.yield}"){
                       recipeNumber
@@ -276,48 +313,99 @@ function CreateTechCard(props) {
                   }
                   
                 `
-            }
-        })
-            .then((response) => {
-                if (response.statusText === "OK" && !response.data.errors) {
-                    setSnackbarText("Technologinė kortelė išsaugota!");
-                    setSnackbarSeverity("success");
-                    handleSnackbar("open");
-                    setDataState({
-                        recipeNumber: "",
-                        nameOfCard: "",
-                        description: "",
-                        data: [
-                            {
-                                number: 1,
-                                code: null,
-                                name: "",
-                                bruto: null,
-                                neto: null,
-                                b: null,
-                                r: null,
-                                a: null,
-                                kcal: null
-                            },
-                        ],
-                        overallB: null,
-                        overallR: null,
-                        overallA: null,
-                        overallKcal: null,
-                        yield: ""
-                    });
-                } else {
+                }
+            })
+                .then((response) => {
+                    if (response.statusText === "OK" && !response.data.errors) {
+                        setSnackbarText("Technologinė kortelė išsaugota!");
+                        setSnackbarSeverity("success");
+                        handleSnackbar("open");
+                        setDataState({
+                            recipeNumber: "",
+                            nameOfCard: "",
+                            description: "",
+                            data: [
+                                {
+                                    number: 1,
+                                    code: null,
+                                    name: "",
+                                    bruto: null,
+                                    neto: null,
+                                    b: null,
+                                    r: null,
+                                    a: null,
+                                    kcal: null
+                                },
+                            ],
+                            overallB: null,
+                            overallR: null,
+                            overallA: null,
+                            overallKcal: null,
+                            yield: ""
+                        });
+                    } else if (response.data.errors[0].message === "Toks receptūros numeris jau egzistuoja!") {
+                        setSnackbarText("Toks receptūros numeris jau egzistuoja!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    } else {
+                        setSnackbarText("Išsaugoti nepavyko!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
                     setSnackbarText("Išsaugoti nepavyko!");
                     setSnackbarSeverity("error");
                     handleSnackbar("open");
+                });
+        }
+    }
+
+    function calculations(i) {
+        let newArr = { ...dataState };
+        let newNeto = newArr.data[i].neto;
+        newArr.data[i].bruto = parseFloat(((firstBruto[i] * newNeto) / 100).toFixed(0));
+        newArr.data[i].b = parseFloat(((firstB[i] * newNeto) / 100).toFixed(2));
+        newArr.data[i].r = parseFloat(((firstR[i] * newNeto) / 100).toFixed(2));
+        newArr.data[i].a = parseFloat(((firstA[i] * newNeto) / 100).toFixed(2));
+        newArr.data[i].kcal = parseFloat(((firstKcal[i] * newNeto) / 100).toFixed(2));
+        setDataState(newArr);
+    }
+
+    function validation() {
+        let validationArr = { ...dataState };
+        if (validationArr.nameOfCard === "") {
+            setSnackbarText("Kortelės pavadinimas negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.recipeNumber === "") {
+            setSnackbarText("Kortelės recepto numeris negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.description === "") {
+            setSnackbarText("Kortelės aprašymas negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.yield === "") {
+            setSnackbarText("Kortelės išeiga negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        } else if (validationArr.data.length > 0) {
+            for (let i = 0; i < validationArr.data.length; i++) {
+                if (validationArr.data[i].code === null) {
+                    setSnackbarText("Kortelės produkto laukas negali būti tusčias!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                    return false;
                 }
-            })
-            .catch((error) => {
-                console.log(error);
-                setSnackbarText("Išsaugoti nepavyko!");
-                setSnackbarSeverity("error");
-                handleSnackbar("open");
-            });
+            }
+        }
+        return true;
     }
 
     return (
@@ -401,6 +489,7 @@ function CreateTechCard(props) {
                                         onChange={handleChange(i)}
                                         error
                                         id="bruto"
+                                        disabled
                                         style={{ width: "75px" }}
                                     /></TableCell>
                                     <TableCell className={classes.border}><TextField1
@@ -426,6 +515,7 @@ function CreateTechCard(props) {
                                         value={row.b || 0}
                                         onChange={handleChange(i)}
                                         error
+                                        disabled
                                         id="b"
                                         style={{ width: "75px" }}
                                     /></TableCell>
@@ -439,6 +529,7 @@ function CreateTechCard(props) {
                                         value={row.r || 0}
                                         onChange={handleChange(i)}
                                         error
+                                        disabled
                                         id="r"
                                         style={{ width: "75px" }}
                                     /></TableCell>
@@ -452,6 +543,7 @@ function CreateTechCard(props) {
                                         value={row.a || 0}
                                         onChange={handleChange(i)}
                                         error
+                                        disabled
                                         id="a"
                                         style={{ width: "75px" }}
                                     /></TableCell>
@@ -466,6 +558,7 @@ function CreateTechCard(props) {
                                             value={row.kcal || 0}
                                             onChange={handleChange(i)}
                                             error
+                                            disabled
                                             id="kcal"
                                             style={{ width: "75px" }}
                                         />

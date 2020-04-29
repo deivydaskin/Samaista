@@ -88,15 +88,16 @@ function CreateMenu(props) {
         const lunchUnquoted = lunchQuoted.replace(/"([^"]+)":/g, '$1:');
         let dinnerQuoted = JSON.stringify(dinnerState.dinnerData);
         const dinnerUnquoted = dinnerQuoted.replace(/"([^"]+)":/g, '$1:');
-
-        axios({
-            url: 'http://localhost:3000/graphql',
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            data: {
-                query: `
+        const validacity = await validation();
+        if (validacity) {
+            axios({
+                url: 'http://localhost:3000/graphql',
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                data: {
+                    query: `
                 mutation {
                     addMenu (nameOfMenu: "${breakfastState.nameOfMenu}", breakfastData: ${breakfastUnquoted}, breakfastOverallB: ${breakfastState.breakfastOverallB}, 
                             breakfastOverallR: ${breakfastState.breakfastOverallR}, breakfastOverallA: ${breakfastState.breakfastOverallA}, breakfastOverallKcal: ${breakfastState.breakfastOverallKcal},
@@ -122,25 +123,37 @@ function CreateMenu(props) {
                   }
 
                 `
-            }
-        })
-            .then((response) => {
-                if (response.statusText === "OK" && !response.data.errors) {
-                    setSnackbarText("Valgiaraštis išsaugotas!");
-                    setSnackbarSeverity("success");
-                    handleSnackbar("open");
-                } else {
-                    setSnackbarText("Išsaugoti nepavyko!");
-                    setSnackbarSeverity("error");
-                    handleSnackbar("open");
                 }
             })
-            .catch((error) => {
-                setSnackbarText("Įvyko klaida!");
-                setSnackbarSeverity("error");
-                handleSnackbar("open");
-                console.log(error);
-            });
+                .then((response) => {
+                    if (response.statusText === "OK" && !response.data.errors) {
+                        setSnackbarText("Valgiaraštis išsaugotas!");
+                        setSnackbarSeverity("success");
+                        handleSnackbar("open");
+                    } else {
+                        setSnackbarText("Išsaugoti nepavyko!");
+                        setSnackbarSeverity("error");
+                        handleSnackbar("open");
+                    }
+                })
+                .catch((error) => {
+                    setSnackbarText("Įvyko klaida!");
+                    setSnackbarSeverity("error");
+                    handleSnackbar("open");
+                    console.log(error);
+                });
+        }
+    }
+
+    function validation() {
+        let validationArr = { ...breakfastState };
+        if (validationArr.nameOfMenu === "") {
+            setSnackbarText("Valgiaraščio pavadinimas negali būti tusčias!");
+            setSnackbarSeverity("error");
+            handleSnackbar("open");
+            return false;
+        }
+        return true;
     }
 
     return (
