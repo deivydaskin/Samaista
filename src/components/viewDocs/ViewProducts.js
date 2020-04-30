@@ -111,6 +111,7 @@ function ViewProducts(props) {
         })
             .then((response) => {
                 setProductName(response.data.data.Products);
+                console.log(JSON.stringify(response.data.data.Products));
             })
             .catch((error) => {
                 setSnackbarText("Įvyko klaida!");

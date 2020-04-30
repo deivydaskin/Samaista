@@ -34,6 +34,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import createPDF from './TechCardPDF';
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -317,6 +318,8 @@ function ViewTechCards(props) {
         }
         else if (type === "delete") {
             deleteTechCard(recipeNumber);
+        } else if (type === "pdf") {
+            createPDF(recipeNumber, getTokenSilently);
         }
     }
 
@@ -814,7 +817,7 @@ function ViewTechCards(props) {
                                                 <EditIcon style={{ color: '#FFFFFF' }} />
                                             </IconButton>
                                             <IconButton edge="end" aria-label="pdf">
-                                                <PictureAsPdfIcon style={{ color: '#FFFFFF' }} />
+                                                <PictureAsPdfIcon style={{ color: '#FFFFFF' }} onClick={() => handleClick(row.recipeNumber, row.nameOfCard, "pdf")} />
                                             </IconButton>
                                             <IconButton edge="end" aria-label="delete">
                                                 <DeleteIcon style={{ color: '#FFFFFF' }} onClick={() => { setDeleteConfirmation({ code: row.recipeNumber, row: i, name: row.nameOfCard }); setOpenDeleteModal(true) }} />

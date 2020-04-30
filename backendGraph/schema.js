@@ -11,6 +11,8 @@ const {
 const Menu = require('./models/Menu.js');
 const TechCard = require('./models/TechCard.js');
 const Product = require('./models/Product.js');
+const pdf = require('./pdf');
+
 
 const menuDataType = new GraphQLObjectType({
     name: 'menuData',
