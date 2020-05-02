@@ -35,3 +35,11 @@
 .third {
   flex: 1 0 auto;
 }
+
+.MiscInputs {
+  display: flex;
+  justify-content: space-evenly;
+}
+.spacing {
+  margin: 15px;
+}

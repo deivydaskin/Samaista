@@ -48,6 +48,7 @@ export default async function createPDF(recipeNumber, getTokenSilently) {
             let overR = response.data.data.TechCardByRecipeNumber.overallR;
             let overKcal = response.data.data.TechCardByRecipeNumber.overallKcal;
             let description = response.data.data.TechCardByRecipeNumber.description;
+
             var body = [];
             body.push([{ text: 'Eil. Nr.', rowSpan: 2 }, { text: 'Maisto produkto pavadinimas', rowSpan: 2, alignment: 'center', margin: [0, 8, 0, 0] }, { text: 'Masė, g.', colSpan: 2, alignment: 'center' }, {}, { text: 'Maistinė ir energinė vertė', colSpan: 4, alignment: 'center' }, {}, {}, {}]);
             body.push([{}, {}, { text: 'Bruto' }, { text: 'Neto' }, { text: 'B(g)' }, { text: 'R(g)' }, { text: 'A(g)' }, { text: 'Kcal(g)' }]);
@@ -111,7 +112,7 @@ export default async function createPDF(recipeNumber, getTokenSilently) {
                     }
                 },
             };
-            pdfMake.createPdf(docDefinition).download();
+            pdfMake.createPdf(docDefinition).download(response.data.data.TechCardByRecipeNumber.nameOfCard.toString());
         })
         .catch((error) => {
             console.log(error);

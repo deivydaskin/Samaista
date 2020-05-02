@@ -25,6 +25,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import createMenuPDF from './MenuPDF';
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -342,6 +343,8 @@ function ViewMenus(props) {
         }
         else if (type === "delete") {
             deleteMenu(nameOfMenu);
+        } else if (type === "pdf") {
+            createMenuPDF(nameOfMenu, getTokenSilently);
         }
     }
 
@@ -498,7 +501,7 @@ function ViewMenus(props) {
                                                 <EditIcon style={{ color: '#FFFFFF' }} />
                                             </IconButton>
                                             <IconButton edge="end" aria-label="pdf">
-                                                <PictureAsPdfIcon style={{ color: '#FFFFFF' }} />
+                                                <PictureAsPdfIcon style={{ color: '#FFFFFF' }} onClick={() => handleClick(row.nameOfMenu, i, "pdf")} />
                                             </IconButton>
                                             <IconButton edge="end" aria-label="delete">
                                                 <DeleteIcon style={{ color: '#FFFFFF' }} onClick={() => { setDeleteConfirmation({ code: row.nameOfMenu, row: i }); setOpenDeleteModal(true) }} />

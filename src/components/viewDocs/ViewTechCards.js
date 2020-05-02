@@ -118,11 +118,9 @@ function ViewTechCards(props) {
     async function getAllTechCards() {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'http://192.168.1.229:3001/graphql',
             method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
+
             data: {
                 query: `
             query{

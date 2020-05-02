@@ -40,6 +40,9 @@ function Menu(props) {
         } else if (e === "viewMenu") {
             props.history.push('/viewMenu')
         }
+        else if (e === "createDailyMenu") {
+            props.history.push('/createDailyMenu')
+        }
     }
 
     return (
@@ -48,6 +51,7 @@ function Menu(props) {
                 <div className="Menu">
                     <div className="createCol">
                         <h3 className="logo">Samaista</h3>
+                        <h3 style={{ color: '#FFFFFF', position: 'absolute', marginTop: '100px' }}>Pasirinkite ką kursite:</h3>
                         <img src={process.env.PUBLIC_URL + '/notebook.png'} />
                         <div className="buttonBox">
                             <Button id="CreateDoc" variant="outlined" color="secondary" className={classes.button} onClick={() => handleSubmit("menu")}>
@@ -59,6 +63,9 @@ function Menu(props) {
                             <Button id="CreateDoc" variant="outlined" color="secondary" className={classes.button} onClick={() => handleSubmit("product")}>
                                 Produktą
                             </Button>
+                            <Button id="viewProducts" variant="outlined" color="primary" className={classes.button} onClick={() => handleSubmit("createDailyMenu")}>
+                                Reikalavimą
+                            </Button>
                         </div>
                     </div>
                     <div className="viewCol">
@@ -66,6 +73,7 @@ function Menu(props) {
                             Atsijungti
                         </Button>
                         <img src={process.env.PUBLIC_URL + '/statistics.png'} />
+                        <h3 style={{ color: '#FFFFFF', position: 'absolute', marginTop: '100px' }}>Pasirinkite ką peržiūrėsite:</h3>
                         <div className="buttonBox">
                             <Button id="viewMenu" variant="outlined" color="primary" className={classes.button} onClick={() => handleSubmit("viewMenu")}>
                                 Valgiaraščius

@@ -14,6 +14,7 @@ import ViewMenu from './components/viewDocs/ViewMenu';
 import { useAuth0 } from "./react-auth0-spa";
 import history from "./utils/history";
 import PrivateRoute from "./components/PrivateRoute";
+import createDayMenu from './components/createDocs/createDayMenu';
 
 const theme = createMuiTheme({
   palette: {
@@ -43,6 +44,7 @@ function App() {
             <PrivateRoute path="/createProduct" component={CreateProduct} />
             <PrivateRoute path="/createTechCard" component={CreateTechCard} />
             <PrivateRoute path="/createMenu" component={CreateMenu} />
+            <PrivateRoute path="/createDailyMenu" component={createDayMenu} />
             <PrivateRoute path="/menu" component={Menu} />
             <Route path="/">
               <Menu />

@@ -178,7 +178,6 @@ function CreateMenu(props) {
 
     function handleSwitchChange() {
         setAgeGroup(!ageGroup);
-        console.log(ageGroup);
     }
 
     function checkLimits(age) {

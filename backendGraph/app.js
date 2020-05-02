@@ -38,12 +38,12 @@ mongoose
   .then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
-app.use('/graphql', jwtCheck, expressGraphQL({
+app.use('/graphql', expressGraphQL({
   schema: schema,
   graphiql: true
 }))
 
-app.get('/pdf', async function (req, res, next) {
+app.get('/pdf', jwtCheck, async function (req, res, next) {
   var myDoc = new PDFDocument({ bufferPages: true });
   const techCard = TechCard.findOne({ recipeNumber: req });
   let buffers = [];
