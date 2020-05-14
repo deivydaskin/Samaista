@@ -1,5 +1,5 @@
 {
-    "domain": "dev-fj-8t2wi.eu.auth0.com",
-    "clientId": "q4zkd67P4jJR9nRzrsbjPeLdZ5ABIbGn",
-    "audience": "http://localhost:3001"
+    "domain": "divine-grass-4753.eu.auth0.com",
+    "clientId": "jFjvtkRo5JmghyNvZ9r15P7lLefRyri6",
+    "audience": "https://samaista.herokuapp.com/"
 }

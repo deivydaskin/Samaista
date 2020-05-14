@@ -113,7 +113,7 @@ function CreateProduct(props) {
         const validicity = await validation();
         if (validicity) {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -160,7 +160,7 @@ function CreateProduct(props) {
     async function getAllProducts() {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`

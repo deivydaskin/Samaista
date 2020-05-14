@@ -11,7 +11,7 @@ const {
 const Menu = require('./models/Menu.js');
 const TechCard = require('./models/TechCard.js');
 const Product = require('./models/Product.js');
-const pdf = require('./pdf');
+const Requirement = require('./models/Requirement.js');
 
 
 const menuDataType = new GraphQLObjectType({
@@ -124,10 +124,25 @@ const ProductType = new GraphQLObjectType({
     })
 });
 
+const RequirementType = new GraphQLObjectType({
+    name: 'Requirement',
+    fields: () => ({
+        nameOfProduct: { type: GraphQLString },
+        amount: { type: GraphQLInt },
+        date: { type: GraphQLString }
+    })
+});
+
 // Root Query
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
+        Requirement: {
+            type: RequirementType,
+            resolve(parentValue, args) {
+                return Requirement.findOne({})
+            }
+        },
         TechCardByName: {
             type: TechCardType,
             args: { nameOfCard: { type: GraphQLString } },
@@ -187,6 +202,22 @@ const RootQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
     name: 'Mutation',
     fields: {
+        addRequirement: {
+            type: RequirementType,
+            args: {
+                //GraphQLNonNull make these field required
+                nameOfProduct: { type: new GraphQLNonNull(GraphQLString) },
+                amount: { type: new GraphQLNonNull(GraphQLInt) },
+            },
+            resolve(parent, args) {
+                let requirement = new Requirement({
+                    nameOfProduct: args.nameOfProduct,
+                    amount: args.amount,
+                    date: Date.now()
+                });
+                return requirement.save();
+            }
+        },
         addTechCard: {
             type: TechCardType,
             args: {

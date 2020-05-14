@@ -161,7 +161,7 @@ function CreateTechCard(props) {
         const token = await getTokenSilently();
         if (type === "code") {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -223,7 +223,7 @@ function CreateTechCard(props) {
                 });
         } else if (type === "name") {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -277,11 +277,12 @@ function CreateTechCard(props) {
         //GraphQL reikalauja names of fields be "" todel panaudojau regex, nes nezinau kaip kitaip isparsint.
         let payload = JSON.stringify(dataState.data);
         const unquoted = payload.replace(/"([^"]+)":/g, '$1:');
+        console.log(unquoted);
         const token = await getTokenSilently();
         const validacity = await validation();
         if (validacity) {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`

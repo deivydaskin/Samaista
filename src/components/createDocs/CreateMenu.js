@@ -102,7 +102,7 @@ function CreateMenu(props) {
         const validacity = await validation();
         if (validacity) {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`

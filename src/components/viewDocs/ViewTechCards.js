@@ -118,9 +118,11 @@ function ViewTechCards(props) {
     async function getAllTechCards() {
         const token = await getTokenSilently();
         axios({
-            url: 'http://192.168.1.229:3001/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
-
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 query: `
             query{
@@ -147,7 +149,7 @@ function ViewTechCards(props) {
         const token = await getTokenSilently();
 
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -273,7 +275,7 @@ function ViewTechCards(props) {
     async function deleteTechCard(recipeNumber) {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -352,7 +354,7 @@ function ViewTechCards(props) {
         let payload = JSON.stringify(techCardToEdit.data);
         const unquoted = payload.replace(/"([^"]+)":/g, '$1:');
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -427,7 +429,7 @@ function ViewTechCards(props) {
     async function getFirstsOfProduct(arg, i, type) {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -484,7 +486,7 @@ function ViewTechCards(props) {
         const token = await getTokenSilently();
         if (type === "code") {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -546,7 +548,7 @@ function ViewTechCards(props) {
                 });
         } else if (type === "name") {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 data: {
                     query: `

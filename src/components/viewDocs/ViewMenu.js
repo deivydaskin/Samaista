@@ -109,7 +109,7 @@ function ViewMenus(props) {
     async function getAllMenus() {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -139,7 +139,7 @@ function ViewMenus(props) {
     async function getMenu(nameOfMenu) {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -300,7 +300,7 @@ function ViewMenus(props) {
     async function deleteMenu(nameOfMenu) {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -409,7 +409,7 @@ function ViewMenus(props) {
         const dinnerUnquoted = dinnerQuoted.replace(/"([^"]+)":/g, '$1:');
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`

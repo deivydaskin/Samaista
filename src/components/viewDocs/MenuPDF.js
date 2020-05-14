@@ -7,7 +7,7 @@ export default async function createMenuPDF(nameOfMenu, getTokenSilently) {
     const token = await getTokenSilently();
     var docDefinition;
     axios({
-        url: 'http://localhost:3000/graphql',
+        url: 'https://samaista.herokuapp.com/graphql',
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`

@@ -80,7 +80,8 @@ function CreateDayMenu(props) {
     const [spinner, setSpinner] = useState(false);
 
     const [menuName, setMenuName] = useState([]);
-    const [selectedMenu, setSelectedMenu] = useState("");
+    const [selectedMenu1_3, setSelectedMenu1_3] = useState("");
+    const [selectedMenu4_7, setSelectedMenu4_7] = useState("");
     const [ageGroup, setAgeGroup] = useState(false);
 
     const [snackbarState, setSnackbarState] = useState(false);
@@ -103,7 +104,7 @@ function CreateDayMenu(props) {
     async function getAllMenus() {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -137,7 +138,7 @@ function CreateDayMenu(props) {
 
     function handleSubmit() {
         setSpinner(true);
-        DayMenuPDF(selectedMenu, getTokenSilently, lopselis, darzelis, darbuotojai);
+        DayMenuPDF(selectedMenu1_3, selectedMenu4_7, getTokenSilently, lopselis, darzelis, darbuotojai);
         setTimeout(function () { setSpinner(spinner); }, 1500);
 
     }
@@ -174,8 +175,10 @@ function CreateDayMenu(props) {
             newDarbCost.cost = e.target.value;
             newDarbCost.sum = newDarbCost.count * newDarbCost.cost;
             setDarbuotojai(newDarbCost)
-        } else if (e.target.name === "category") {
-            setSelectedMenu(e.target.value);
+        } else if (e.target.name === "category1-3") {
+            setSelectedMenu1_3(e.target.value);
+        } else if (e.target.name === "category4-7") {
+            setSelectedMenu4_7(e.target.value);
         }
 
     }
@@ -187,20 +190,25 @@ function CreateDayMenu(props) {
                     <Button variant="contained" color="secondary" className="backBtn" onClick={() => props.history.push('/menu')}>Atgal</Button>
                 </div>
             </div>
-            <div style={{ alignSelf: "flex-end", marginRight: "35px" }}>
-                <b style={{ color: "#FFFFFF", fontSize: "0.8em" }}>1-3m.</b>
-                <Switch
-                    checked={ageGroup}
-                    onChange={handleSwitchChange}
-                    name="ageGroupe"
-                    inputProps={{ 'aria-label': 'secondary checkbox' }}
-                />
-                <b style={{ color: "#FFFFFF", fontSize: "0.8em" }}>4-7m.</b>
-            </div>
             <div style={{ marginTop: "100px", color: "#FFFFFF" }}><h3>Valgiaraštis (Reikalavimas)</h3></div>
 
             <div className="MiscInputs">
-                {!ageGroup ?
+                <div className="spacing">
+                    <TextField1
+                        inputProps={{
+                            style: { color: '#FFFFFF', width: 100 },
+                            type: 'number',
+                            step: '1',
+                            min: '0'
+                        }}
+                        value={lopselis.count || 0}
+                        onChange={handleChange()}
+                        error
+                        label="Lopšelis"
+                        id="lopselis"
+                    />
+                </div>
+                <div className="MiscInputs">
                     <div className="spacing">
                         <TextField1
                             inputProps={{
@@ -209,50 +217,47 @@ function CreateDayMenu(props) {
                                 step: '1',
                                 min: '0'
                             }}
-                            value={lopselis.count || 0}
+                            value={darzelis.count || 0}
                             onChange={handleChange()}
                             error
-                            label="Lopšelis"
-                            id="lopselis"
+                            label="Darželis"
+                            id="darzelis"
                         />
                     </div>
-                    :
-                    <div className="MiscInputs">
-                        <div className="spacing">
-                            <TextField1
-                                inputProps={{
-                                    style: { color: '#FFFFFF', width: 100 },
-                                    type: 'number',
-                                    step: '1',
-                                    min: '0'
-                                }}
-                                value={darzelis.count || 0}
-                                onChange={handleChange()}
-                                error
-                                label="Darželis"
-                                id="darzelis"
-                            />
-                        </div>
-                        <div className="spacing">
-                            <TextField1
-                                inputProps={{
-                                    style: { color: '#FFFFFF', width: 100 },
-                                    type: 'number',
-                                    step: '1',
-                                    min: '0'
-                                }}
-                                value={darbuotojai.count || 0}
-                                onChange={handleChange()}
-                                error
-                                label="Darbuotojai"
-                                id="darbuotojai"
-                            />
-                        </div>
+                    <div className="spacing">
+                        <TextField1
+                            inputProps={{
+                                style: { color: '#FFFFFF', width: 100 },
+                                type: 'number',
+                                step: '1',
+                                min: '0'
+                            }}
+                            value={darbuotojai.count || 0}
+                            onChange={handleChange()}
+                            error
+                            label="Darbuotojai"
+                            id="darbuotojai"
+                        />
                     </div>
-                }
+                </div>
             </div>
             <div className="MiscInputs">
-                {!ageGroup ?
+                <div className="spacing">
+                    <TextField1
+                        inputProps={{
+                            style: { color: '#FFFFFF', width: 100 },
+                            type: 'number',
+                            step: '0.01',
+                            min: '0'
+                        }}
+                        value={lopselis.cost || 0}
+                        onChange={handleChange()}
+                        error
+                        label="Lopš. vertė"
+                        id="lopselisCost"
+                    />
+                </div>
+                <div className="MiscInputs">
                     <div className="spacing">
                         <TextField1
                             inputProps={{
@@ -261,50 +266,48 @@ function CreateDayMenu(props) {
                                 step: '0.01',
                                 min: '0'
                             }}
-                            value={lopselis.cost || 0}
+                            value={darzelis.cost || 0}
                             onChange={handleChange()}
                             error
-                            label="Lopš. vertė"
-                            id="lopselisCost"
+                            label="Darž. vertė"
+                            id="darzelisCost"
                         />
                     </div>
-                    :
-                    <div className="MiscInputs">
-                        <div className="spacing">
-                            <TextField1
-                                inputProps={{
-                                    style: { color: '#FFFFFF', width: 100 },
-                                    type: 'number',
-                                    step: '0.01',
-                                    min: '0'
-                                }}
-                                value={darzelis.cost || 0}
-                                onChange={handleChange()}
-                                error
-                                label="Darž. vertė"
-                                id="darzelisCost"
-                            />
-                        </div>
-                        <div className="spacing">
-                            <TextField1
-                                inputProps={{
-                                    style: { color: '#FFFFFF', width: 100 },
-                                    type: 'number',
-                                    step: '0.01',
-                                    min: '0'
-                                }}
-                                value={darbuotojai.cost || 0}
-                                onChange={handleChange()}
-                                error
-                                label="Darb. vertė"
-                                id="darbuotojaiCost"
-                            />
-                        </div>
+                    <div className="spacing">
+                        <TextField1
+                            inputProps={{
+                                style: { color: '#FFFFFF', width: 100 },
+                                type: 'number',
+                                step: '0.01',
+                                min: '0'
+                            }}
+                            value={darbuotojai.cost || 0}
+                            onChange={handleChange()}
+                            error
+                            label="Darb. vertė"
+                            id="darbuotojaiCost"
+                        />
                     </div>
-                }
+                </div>
             </div>
             <div className="MiscInputs">
-                {!ageGroup ?
+                <div className="spacing">
+                    <TextField1
+                        inputProps={{
+                            style: { color: '#FFFFFF', width: 100 },
+                            type: 'number',
+                            step: '1',
+                            min: '0'
+                        }}
+                        value={lopselis.sum.toFixed(2) || ''}
+                        onChange={handleChange()}
+                        error
+                        disabled
+                        label="Lopš. suma"
+                        id="lopselisSum"
+                    />
+                </div>
+                <div className="MiscInputs">
                     <div className="spacing">
                         <TextField1
                             inputProps={{
@@ -313,56 +316,37 @@ function CreateDayMenu(props) {
                                 step: '1',
                                 min: '0'
                             }}
-                            value={lopselis.sum.toFixed(2) || ''}
+                            value={darzelis.sum.toFixed(2) || ''}
                             onChange={handleChange()}
                             error
                             disabled
-                            label="Lopš. suma"
-                            id="lopselisSum"
+                            label="Darž. suma"
+                            id="darzelisSum"
                         />
                     </div>
-                    :
-                    <div className="MiscInputs">
-                        <div className="spacing">
-                            <TextField1
-                                inputProps={{
-                                    style: { color: '#FFFFFF', width: 100 },
-                                    type: 'number',
-                                    step: '1',
-                                    min: '0'
-                                }}
-                                value={darzelis.sum.toFixed(2) || ''}
-                                onChange={handleChange()}
-                                error
-                                disabled
-                                label="Darž. suma"
-                                id="darzelisSum"
-                            />
-                        </div>
-                        <div className="spacing">
-                            <TextField1
-                                inputProps={{
-                                    style: { color: '#FFFFFF', width: 100 },
-                                    type: 'number',
-                                    step: '1',
-                                    min: '0'
-                                }}
-                                value={darbuotojai.sum.toFixed(2) || ''}
-                                onChange={handleChange()}
-                                error
-                                disabled
-                                label="Darb. suma"
-                                id="darbuotojaiSum"
-                            />
-                        </div>
+                    <div className="spacing">
+                        <TextField1
+                            inputProps={{
+                                style: { color: '#FFFFFF', width: 100 },
+                                type: 'number',
+                                step: '1',
+                                min: '0'
+                            }}
+                            value={darbuotojai.sum.toFixed(2) || ''}
+                            onChange={handleChange()}
+                            error
+                            disabled
+                            label="Darb. suma"
+                            id="darbuotojaiSum"
+                        />
                     </div>
-                }
+                </div>
             </div>
 
             <div className="Select">
                 <InputLabel id="demo-simple-select-helper-label" style={{ color: "#FFFFFF" }}>Valgiaraštis</InputLabel>
                 <Select
-                    value={selectedMenu}
+                    value={selectedMenu1_3}
                     onChange={handleChange()}
                     displayEmpty
                     label="Valgiaraštis"
@@ -372,10 +356,10 @@ function CreateDayMenu(props) {
                             icon: classes.icon,
                         },
                     }}
-                    name="category"
+                    name="category1-3"
                     noWrap
                     style={{
-                        minWidth: "300px",
+                        minWidth: "355px",
                         color: "#FFFFFF",
                         icon: "#FFFFFF"
                     }}
@@ -390,6 +374,37 @@ function CreateDayMenu(props) {
 
                 </Select>
             </div>
+            {/* <div className="Select">
+                <InputLabel id="demo-simple-select-helper-label" style={{ color: "#FFFFFF", marginTop: "10px" }}>Valgiaraštis 4-7m.</InputLabel>
+                <Select
+                    value={selectedMenu4_7}
+                    onChange={handleChange()}
+                    displayEmpty
+                    label="Valgiaraštis"
+                    className={classes.select}
+                    inputProps={{
+                        classes: {
+                            icon: classes.icon,
+                        },
+                    }}
+                    name="category4-7"
+                    noWrap
+                    style={{
+                        minWidth: "355px",
+                        color: "#FFFFFF",
+                        icon: "#FFFFFF"
+                    }}
+                >
+                    {menuName.length ?
+                        menuName.map((row) => (
+                            <MenuItem value={row}>{row}</MenuItem>
+                        ))
+                        :
+                        <MenuItem value="">Nėra</MenuItem>
+                    }
+
+                </Select>
+            </div> */}
             {spinner ? <CircularProgress color="primary" size={68} disableShrink style={{ marginLeft: "30px" }} thickness={5} />
                 :
                 <Button onClick={handleSubmit} variant="contained" color="secondary" className={classes.button} style={{ alignSelf: "center" }}>Generuoti PDF</Button>

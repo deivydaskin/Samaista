@@ -82,7 +82,7 @@ function Breakfast(props) {
         const token = await getTokenSilently();
         if (type === "name") {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -134,7 +134,7 @@ function Breakfast(props) {
                 });
         } else if (type === "recipeNumber") {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -318,10 +318,10 @@ function Breakfast(props) {
                             ))}
                             <TableRow>
                                 <TableCell align="right" colSpan={3} className={classes.border}>Iš viso:</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallB}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallR}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallA}</TableCell>
-                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallKcal}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallB.toFixed(2)}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallR.toFixed(2)}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallA.toFixed(2)}</TableCell>
+                                <TableCell align="center" className={classes.border}>{props.breakfastState.breakfastOverallKcal.toFixed(2)}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>

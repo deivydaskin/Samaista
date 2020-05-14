@@ -93,7 +93,7 @@ function ViewProducts(props) {
     async function getAllProducts() {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -124,7 +124,7 @@ function ViewProducts(props) {
     async function getProduct(code) {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -204,7 +204,7 @@ function ViewProducts(props) {
     async function deleteProduct(code) {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`
@@ -268,7 +268,7 @@ function ViewProducts(props) {
     async function handleSubmit() {
         const token = await getTokenSilently();
         axios({
-            url: 'http://localhost:3000/graphql',
+            url: 'https://samaista.herokuapp.com/graphql',
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`

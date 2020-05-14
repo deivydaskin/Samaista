@@ -79,7 +79,7 @@ function Lunch(props) {
         const token = await getTokenSilently();
         if (type === "name") {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -131,7 +131,7 @@ function Lunch(props) {
                 });
         } else if (type === "recipeNumber") {
             axios({
-                url: 'http://localhost:3000/graphql',
+                url: 'https://samaista.herokuapp.com/graphql',
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`

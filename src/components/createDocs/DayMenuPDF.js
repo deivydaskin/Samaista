@@ -3,12 +3,12 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 import axios from 'axios';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
-export default async function DayMenuPDF(nameOfMenu, getTokenSilently, lopselisState, darzelisState, darbuotojaiState) {
+export default async function DayMenuPDF(nameOfMenu, nameOfMenu2, getTokenSilently, lopselisState, darzelisState, darbuotojaiState) {
     const token = await getTokenSilently();
     var docDefinition;
 
     axios({
-        url: 'http://localhost:3000/graphql',
+        url: 'https://samaista.herokuapp.com/graphql',
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`
@@ -244,11 +244,13 @@ export default async function DayMenuPDF(nameOfMenu, getTokenSilently, lopselisS
 
             }
             var concatedArr = breakfastProducts.concat(lunchProducts.concat(dinnerProducts));
+
             let filteredArr = concatedArr.filter((elem, index, self) => self.findIndex(
                 (t) => { return (t.name === elem.name && t.bruto === elem.bruto) }) === index)
             var temp2 = [];
             var temp2 = [];
             var body3 = [];
+            var toDataBase = [];
             for (let i = 0; i < filteredArr.length; i++) {
                 temp2 = [];
                 let kiekisViso = 0;
@@ -276,24 +278,22 @@ export default async function DayMenuPDF(nameOfMenu, getTokenSilently, lopselisS
 
                     } else if (j === 0) {
                         temp2.push({ text: filteredArr[i].name });
+
                     } else if (j === (temp1.length - 2)) {
                         temp2.push({ text: kiekisViso / 1000 + " kg." });
+                        toDataBase.push({ nameOfProduct: filteredArr[i].name, amount: kiekisViso })
                     } else {
                         temp2.push({});
                     }
+
+
                 }
                 // temp2.push({ text: kiekisViso });
                 // temp2.push({});
                 body2.push(temp2);
             }
-
-            // console.log(temp1.length);
-            //console.log(JSON.stringify(filteredArr[0]));
-
-            console.log(lunchProducts);
-            // console.log(lunchProducts);
-            // console.log(dinnerProducts);
-
+            console.log(toDataBase);
+            handlePost(toDataBase, token);
 
             function table2() {
                 return {
@@ -336,7 +336,39 @@ export default async function DayMenuPDF(nameOfMenu, getTokenSilently, lopselisS
                     }
                 },
             };
-            pdfMake.createPdf(docDefinition).download();
+            pdfMake.createPdf(docDefinition).download("Reikalavimas_" + nameOfMenu);
+
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+function handlePost(data, token) {
+    console.log(JSON.stringify(data));
+    let Quoted = JSON.stringify(data);
+    const Unquoted = Quoted.replace(/"([^"]+)":/g, '$1:')
+    axios({
+        url: 'https://samaista.herokuapp.com/graphql',
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        data: {
+            query: `
+            mutation{
+                addRequirement(products: ${Unquoted}) {
+                    products {
+                        nameOfProduct
+                        amount
+                    }
+                }
+            }
+            `
+        }
+    })
+        .then((response) => {
+            console.log(response);
 
         })
         .catch((error) => {
@@ -348,7 +380,7 @@ export default async function DayMenuPDF(nameOfMenu, getTokenSilently, lopselisS
 async function getProducts(recipeNumber, token) {
     //let returnObj = { name: '', bruto: 0, nameOfCard: '' };
     return axios({
-        url: 'http://localhost:3000/graphql',
+        url: 'https://samaista.herokuapp.com/graphql',
         method: 'POST',
         headers: {
             Authorization: `Bearer ${token}`
@@ -379,4 +411,62 @@ async function getProducts(recipeNumber, token) {
     // .catch((error) => {
     //     console.log(error);
     // });
+}
+
+async function getMenu(nameOfMenu2, token) {
+    return axios({
+        url: 'https://samaista.herokuapp.com/graphql',
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        data: {
+            query: `
+        query{
+            MenuByName(nameOfMenu: "${nameOfMenu2}") {
+                nameOfMenu
+                breakfastData{
+                  recipeNumber
+                        name
+                  yield
+                  b
+                  r
+                  a
+                  kcal
+                }
+                breakfastOverallB
+                breakfastOverallR
+                breakfastOverallA
+                breakfastOverallKcal
+                lunchData{
+                  recipeNumber
+                        name
+                  yield
+                  b
+                  r
+                  a
+                  kcal
+                }
+                lunchOverallB
+                lunchOverallR
+                lunchOverallA
+                lunchOverallKcal
+                dinnerData{
+                  recipeNumber
+                        name
+                  yield
+                  b
+                  r
+                  a
+                  kcal
+                }
+                dinnerOverallB
+                dinnerOverallR
+                dinnerOverallA
+                dinnerOverallKcal
+              } 
+        }
+        `
+        }
+    });
 }
