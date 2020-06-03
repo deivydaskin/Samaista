@@ -206,7 +206,7 @@ function Dinner(props) {
         if (margin) {
             margin = margin + 70;
         } else {
-            margin = 870;
+            margin = 920;
         }
         document.getElementById("marginTop").style.marginTop = margin + "px";
 

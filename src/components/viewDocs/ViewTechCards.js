@@ -68,6 +68,7 @@ function ViewTechCards(props) {
     const { getTokenSilently } = useAuth0();
 
     const [techCardName, setTechCardName] = useState([]);
+    const [searchStateTechCard, setSearchStateTechCard] = useState("");
     const [edit, setEdit] = useState(false);
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarText, setSnackbarText] = useState("");
@@ -136,6 +137,7 @@ function ViewTechCards(props) {
         })
             .then((response) => {
                 setTechCardName(response.data.data.TechCards);
+                setSearchStateTechCard(response.data.data.TechCards);
             })
             .catch((error) => {
                 setSnackbarText("Įvyko klaida!");
@@ -604,6 +606,12 @@ function ViewTechCards(props) {
         countOverall();
     }
 
+    const handleSearch = i => e => {
+        let tempArr = [...searchStateTechCard];
+        let results = tempArr.filter(el => el.nameOfCard.includes(e.target.value));
+        setTechCardName(results);
+    }
+
     return (
         <div className="viewProducts">
             <div className="backBtn">
@@ -802,6 +810,11 @@ function ViewTechCards(props) {
                 </div>
                 :
                 <Grid className="product">
+                    <TextField1
+                        placeholder="Paieška"
+                        onChange={handleSearch()}
+                        id="search"
+                    />
                     <h3 style={{ color: "#FFFFFF" }}>Technologinės kortelės</h3>
                     {techCardName.length ?
                         <div className={classes.demo} >

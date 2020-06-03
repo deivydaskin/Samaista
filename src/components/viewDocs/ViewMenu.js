@@ -26,10 +26,35 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import createMenuPDF from './MenuPDF';
+import TextFieldMui from '@material-ui/core/TextField';
+import { styles } from '../../css/inline-style/createMenuStyle.js';
+import { withStyles } from '@material-ui/core/styles';
+
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
+
+const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) {
+    return (
+        <TextFieldMui
+            InputLabelProps={{
+                classes: {
+                    root: classes.label,
+                    focused: classes.focusedLabel,
+                    error: classes.erroredLabel
+                }
+            }}
+            InputProps={{
+                classes: {
+                    root: classes.underline,
+                    error: classes.error
+                }
+            }}
+            {...props}
+        />
+    );
+});
 
 function ViewMenus(props) {
 
@@ -38,6 +63,7 @@ function ViewMenus(props) {
     const { getTokenSilently } = useAuth0();
 
     const [menuName, setMenuName] = useState([]);
+    const [searchStateMenu, setSearchStateMenu] = useState("");
     const [edit, setEdit] = useState(false);
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarText, setSnackbarText] = useState("");
@@ -127,6 +153,7 @@ function ViewMenus(props) {
             .then((response) => {
                 console.log(response);
                 setMenuName(response.data.data.Menus);
+                setSearchStateMenu(response.data.data.Menus);
             })
             .catch((error) => {
                 setSnackbarText("Įvyko klaida!");
@@ -463,6 +490,12 @@ function ViewMenus(props) {
             });
     }
 
+    const handleSearch = i => e => {
+        let tempArr = [...searchStateMenu];
+        let results = tempArr.filter(el => el.nameOfMenu.includes(e.target.value));
+        setMenuName(results);
+    }
+
 
     return (
         <div className="viewProducts">
@@ -487,6 +520,11 @@ function ViewMenus(props) {
                 </div >
                 :
                 <Grid className="product">
+                    <TextField1
+                        placeholder="Paieška"
+                        onChange={handleSearch()}
+                        id="search"
+                    />
                     <h3 style={{ color: "#FFFFFF" }}>Meniu</h3>
                     {menuName.length ?
                         <div className={classes.demo} >

@@ -246,11 +246,12 @@ export default async function DayMenuPDF(nameOfMenu, nameOfMenu2, getTokenSilent
             var concatedArr = breakfastProducts.concat(lunchProducts.concat(dinnerProducts));
 
             let filteredArr = concatedArr.filter((elem, index, self) => self.findIndex(
-                (t) => { return (t.name === elem.name && t.bruto === elem.bruto) }) === index)
+                (t) => { return (t.name === elem.name) }) === index)
             var temp2 = [];
             var temp2 = [];
             var body3 = [];
             var toDataBase = [];
+            console.log(filteredArr);
             for (let i = 0; i < filteredArr.length; i++) {
                 temp2 = [];
                 let kiekisViso = 0;
@@ -258,22 +259,41 @@ export default async function DayMenuPDF(nameOfMenu, nameOfMenu2, getTokenSilent
                 let lunchCountTemp = lunchCount;
                 let dinnerCountTemp = dinnerCount;
                 for (let j = 0; j < temp1.length; j++) {
+                    //console.log(temp1[j].text + " | " + filteredArr[i].nameOfCard);
                     if (temp1[j].text) {
-                        if (temp1[j].text === filteredArr[i].nameOfCard) {
-                            temp2.push({ text: filteredArr[i].bruto });
-                        } else {
+                        let empty = true;
+                        let test = 0;
+                        for (let k = 0; k < concatedArr.length; k++) {
+                            if (temp1[j].text === concatedArr[k].nameOfCard && concatedArr[k].name === filteredArr[i].name) {
+                                test += concatedArr[k].bruto;
+                                empty = false;
+                            }
+                        }
+                        if (empty) {
                             temp2.push({});
-                        }
-                        if (breakFastCountTemp > 0 && temp1[j].text === filteredArr[i].nameOfCard) {
-                            kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count)) * parseInt(filteredArr[i].bruto));
-                            breakFastCountTemp = breakFastCountTemp - 1;
-                        } else if (breakFastCountTemp <= 0 && lunchCountTemp > 0 && temp1[j].text === filteredArr[i].nameOfCard) {
-                            kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count) + parseInt(darbuotojaiState.count)) * parseInt(filteredArr[i].bruto));
-                            lunchCountTemp = lunchCountTemp - 1;
-                        } else if (breakFastCountTemp <= 0 && lunchCountTemp <= 0 && dinnerCountTemp > 0 && temp1[j].text === filteredArr[i].nameOfCard) {
-                            kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count)) * parseInt(filteredArr[i].bruto));
-                            dinnerCountTemp = dinnerCountTemp - 1;
-                        }
+                        } else {
+                            temp2.push({ text: test + "g." });
+                            if (breakFastCountTemp > 0) {
+                                kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count)) * parseInt(test));
+                                breakFastCountTemp = breakFastCountTemp - 1;
+                            } else if (breakFastCountTemp <= 0) {
+                                kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count) + parseInt(darbuotojaiState.count)) * parseInt(test));
+                                lunchCountTemp = lunchCountTemp - 1;
+                            } else if (breakFastCountTemp <= 0) {
+                                kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count)) * parseInt(test));
+                                dinnerCountTemp = dinnerCountTemp - 1;
+                            }
+                        };
+                        // if (breakFastCountTemp > 0 && temp1[j].text === filteredArr[i].nameOfCard) {
+                        //     kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count)) * parseInt(filteredArr[i].bruto));
+                        //     breakFastCountTemp = breakFastCountTemp - 1;
+                        // } else if (breakFastCountTemp <= 0 && lunchCountTemp > 0 && temp1[j].text === filteredArr[i].nameOfCard) {
+                        //     kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count) + parseInt(darbuotojaiState.count)) * parseInt(filteredArr[i].bruto));
+                        //     lunchCountTemp = lunchCountTemp - 1;
+                        // } else if (breakFastCountTemp <= 0 && lunchCountTemp <= 0 && dinnerCountTemp > 0 && temp1[j].text === filteredArr[i].nameOfCard) {
+                        //     kiekisViso += ((parseInt(lopselisState.count) + parseInt(darzelisState.count)) * parseInt(filteredArr[i].bruto));
+                        //     dinnerCountTemp = dinnerCountTemp - 1;
+                        // }
 
 
                     } else if (j === 0) {

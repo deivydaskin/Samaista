@@ -62,11 +62,11 @@ const TextField1 = withStyles(styles)(function TextField({ classes, ...props }) 
 
 
 function ViewProducts(props) {
-
     const classes = useStyles();
     const { getTokenSilently } = useAuth0();
 
     const [productName, setProductName] = useState([]);
+    const [searchState, setSearchState] = useState("");
     const [edit, setEdit] = useState(false);
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarText, setSnackbarText] = useState("");
@@ -87,7 +87,7 @@ function ViewProducts(props) {
     });
 
     useEffect(() => {
-        getAllProducts()
+        getAllProducts();
     }, []);
 
     async function getAllProducts() {
@@ -111,7 +111,7 @@ function ViewProducts(props) {
         })
             .then((response) => {
                 setProductName(response.data.data.Products);
-                console.log(JSON.stringify(response.data.data.Products));
+                setSearchState(response.data.data.Products);
             })
             .catch((error) => {
                 setSnackbarText("Įvyko klaida!");
@@ -263,6 +263,7 @@ function ViewProducts(props) {
             kcal: null,
             category: ""
         });
+        setProductName(searchState);
     }
 
     async function handleSubmit() {
@@ -311,6 +312,12 @@ function ViewProducts(props) {
             });
     }
 
+    const handleSearch = i => e => {
+        let tempArr = [...searchState];
+        let results = tempArr.filter(el => el.nameOfProduct.includes(e.target.value));
+        setProductName(results);
+    }
+
     return (
         <div className="viewProducts">
             <div className="backBtn">
@@ -318,6 +325,9 @@ function ViewProducts(props) {
             </div>
             {edit ?
                 <div className="product">
+                    <div className="createProductName">
+                        <h3 style={{ color: "#FFFFFF", marginLeft: "550px" }}>Produktas</h3>
+                    </div>
                     <Container classes={classes.root} maxWidth="lg">
                         <Table className={classes.table} aria-label="spanning table">
                             <TableHead>
@@ -488,6 +498,11 @@ function ViewProducts(props) {
                 </div>
                 :
                 <Grid className="product">
+                    <TextField1
+                        placeholder="Paieška"
+                        onChange={handleSearch()}
+                        id="search"
+                    />
                     <h3 style={{ color: "#FFFFFF" }}>Produktai</h3>
                     {productName.length ?
                         <div className={classes.demo} >

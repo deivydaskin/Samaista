@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../css/createMenu.css';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
@@ -17,6 +17,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { age3, age7 } from './LegalLimits';
 import Switch from '@material-ui/core/Switch';
+import Norms from './Norms.js';
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -25,6 +26,7 @@ function Alert(props) {
 function CreateMenu(props) {
     const classes = useStyles();
     const { getTokenSilently } = useAuth0();
+    const [editNorms, setEditNorms] = useState(false);
     const [snackbarState, setSnackbarState] = useState(false);
     const [snackbarText, setSnackbarText] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -32,6 +34,8 @@ function CreateMenu(props) {
     const [overLimitName, setOverLimitName] = useState();
     // ageGroupe false = 3 years, true = 7 years.
     const [ageGroup, setAgeGroup] = useState(false);
+    const [age3State, setAge3State] = useState();
+    const [age7State, setAge7State] = useState();
     const [breakfastState, setBreakfastState] = useState({
         nameOfMenu: "",
         breakfastData: [
@@ -82,12 +86,75 @@ function CreateMenu(props) {
         dinnerOverallKcal: 0
     });
 
+    useEffect(() => {
+        getNorms();
+    }, []);
+
+
     function handleSnackbar(action) {
         if (action === "open") {
             setSnackbarState(true);
         } else if (action === "close") {
             setSnackbarState(false);
         }
+    }
+
+    async function getNorms() {
+        const token = await getTokenSilently();
+        axios({
+            url: 'https://samaista.herokuapp.com/graphql',
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            data: {
+                query: `
+                query{
+                    Norm{
+                          ageGroup
+                          breakFastLimit {
+                            kcalMin
+                            kcalMax
+                            bMin
+                            bMax
+                            rMin
+                            rMax
+                            aMin
+                            aMax
+                          }
+                          lunchLimit {
+                            kcalMin
+                            kcalMax
+                            bMin
+                            bMax
+                            rMin
+                            rMax
+                            aMin
+                            aMax
+                          }
+                          dinnerLimit {
+                            kcalMin
+                            kcalMax
+                            bMin
+                            bMax
+                            rMin
+                            rMax
+                            aMin
+                            aMax
+                          }
+                        }
+                    }
+                `
+            }
+        })
+            .then((response) => {
+                console.log(response.data.data.Norm);
+                setAge3State(response.data.data.Norm[0]);
+                setAge7State(response.data.data.Norm[1]);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     }
 
     async function saveDoc() {
@@ -170,9 +237,9 @@ function CreateMenu(props) {
 
     function handleSubmit() {
         if (!ageGroup) {
-            checkLimits(age3);
+            checkLimits(age3State);
         } else if (ageGroup) {
-            checkLimits(age7);
+            checkLimits(age7State);
         }
     }
 
@@ -275,6 +342,10 @@ function CreateMenu(props) {
                     inputProps={{ 'aria-label': 'secondary checkbox' }}
                 />
                 <b style={{ color: "#FFFFFF", fontSize: "0.8em" }}>4-7m.</b>
+
+            </div>
+            <div style={{ alignSelf: "flex-end", marginRight: "70px" }}>
+                <Button variant="contained" color="secondary" onClick={() => setEditNorms(true)}>Normos</Button>
             </div>
             <div className="MenuContainer">
 
@@ -319,6 +390,7 @@ function CreateMenu(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Norms editNorms={editNorms} setEditNorms={setEditNorms} age3State={age3State} age7State={age7State} />
         </div >
     );
 }
